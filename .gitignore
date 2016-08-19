@@ -1,0 +1,6 @@
+*.pyc
+*.swp
+.DS_Store
+build/
+dist/
+budou.egg-info/
