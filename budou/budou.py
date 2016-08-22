@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc. All rights reserved
+# Copyright 2016 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Budou, an automatic line break organizer based on Cloud Natural Language API."""
+"""Budou, an automatic CJK line break organizer."""
 
-from googleapiclient import discovery
-from lxml import etree
-from lxml import html
-import base64
 import cgi
 import collections
-import httplib2
-import json
-import oauth2client.service_account
 import re
+from googleapiclient import discovery
+import httplib2
+from lxml import etree
+from lxml import html
+import oauth2client.service_account
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
 """Word chunk object.
@@ -32,7 +30,7 @@ Args:
   word: Surface word of the chunk. (unicode)
   pos: Part of speech. (string)
   label: Label information. (string)
-  forward: Whether the word depends on the following words syntactically. (boolean)
+  forward: Whether the word depends on the following words. (boolean)
 """
 
 Element = collections.namedtuple('Element', ['text', 'tag', 'source', 'index'])
@@ -42,7 +40,7 @@ Args:
   text: Text of the element (unicode).
   tag: Tag name of the element (string).
   source: HTML source of the element (string).
-  index: Character-wise offset of the element from the top of the sentence (number).
+  index: Character-wise offset from the top of the sentence (number).
 """
 
 SPACE_POS = 'SPACE'
@@ -52,19 +50,25 @@ TARGET_LABEL = ('P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'MWV', 'AUXPASS', 'AUXVV')
 
 
 class Budou(object):
-  def __init__(self, driver):
-    self.driver = driver
+  """A parser for CJK line break organizer.
+
+  Attributes:
+    service: A Resource object with methods for interacting with the service.
+  """
+
+  def __init__(self, service):
+    self.service = service
 
   @classmethod
   def login(cls, json_path):
     credentials = (
         oauth2client.service_account.ServiceAccountCredentials
         .from_json_keyfile_name(json_path, scopes=[
-          'https://www.googleapis.com/auth/cloud-platform']))
+            'https://www.googleapis.com/auth/cloud-platform']))
     http = httplib2.Http()
     credentials.authorize(http)
-    driver = discovery.build('language', 'v1beta1', http=http)
-    return cls(driver)
+    service = discovery.build('language', 'v1beta1', http=http)
+    return cls(service)
 
   def Process(self, source, classname=DEFAULT_CLASS_NAME):
     """Processes input HTML code into parsed word chunks and organized code.
@@ -90,30 +94,25 @@ class Budou(object):
     }
     return result_value
 
-
   def _GetAnnotations(self, text, encoding='UTF32'):
     """Returns the list of annotations from the given text."""
     body = {
-      'document': {
-        'type': 'PLAIN_TEXT',
-        'content': text,
-      },
-      'features': {
-        'extract_syntax': True,
-      },
-      'encodingType': encoding,
+        'document': {
+            'type': 'PLAIN_TEXT',
+            'content': text,
+        },
+        'features': {
+            'extract_syntax': True,
+        },
+        'encodingType': encoding,
     }
 
-    request = self.driver.documents().annotateText(body=body)
+    request = self.service.documents().annotateText(body=body)
     response = request.execute()
-    try:
-      return response.get('tokens', [])
-    except:
-      return []
-
+    return response.get('tokens', [])
 
   def _Preprocess(self, source):
-    """Preprocesses input HTML code by removing unnecessary break lines and whitespaces.
+    """Removes unnecessary break lines and whitespaces.
 
     Args:
       source: HTML code to be processed (unicode).
@@ -125,7 +124,6 @@ class Budou(object):
     source = re.sub(r'<br\s*\/?\s*>', u' ', source, re.I)
     source = re.sub(r'\s\s+', u' ', source)
     return source
-
 
   def _GetSourceChunks(self, input_text):
     """Returns the words chunks.
@@ -147,11 +145,11 @@ class Budou(object):
       if begin_offset > sentence_length:
         chunks.append(Chunk(u' ', SPACE_POS, SPACE_POS, True))
         sentence_length = begin_offset
-      chunks.append(Chunk(word, pos, label,
+      chunks.append(Chunk(
+          word, pos, label,
           tokens.index(token) < token['dependencyEdge']['headTokenIndex']))
       sentence_length += len(word)
     return chunks
-
 
   def _MigrateHTML(self, chunks, dom):
     """Migrates HTML elements to the word chunks by bracketing each element.
@@ -177,7 +175,8 @@ class Budou(object):
           result.append(Chunk(
               chunk.word.replace(element.text, element.source),
               HTML_POS, HTML_POS, True))
-        elif index < element.index + len(element.text) <= index + len(chunk.word):
+        elif (index < element.index + len(element.text) and
+              element.index + len(element.text) <= index + len(chunk.word)):
           concat_chunks.append(chunk)
           new_word = u''.join([c_chunk.word for c_chunk in concat_chunks])
           new_word = new_word.replace(element.text, element.source)
@@ -188,7 +187,6 @@ class Budou(object):
         index += len(chunk.word)
       chunks = result
     return chunks
-
 
   def _GetElementsList(self, dom):
     """Digs DOM to the first depth and returns the list of elements.
@@ -214,7 +212,6 @@ class Budou(object):
       if element.tail: index += len(element.tail)
     return result
 
-
   def _Spanize(self, chunks, classname):
     """Returns concatenated HTML code with SPAN tag.
 
@@ -234,12 +231,12 @@ class Budou(object):
             cgi.escape(classname, quote=True), chunk.word))
     return ''.join(result)
 
-
   def _ConcatenateChunks(self, chunks, forward=True):
     """Concatenates chunks based on the direction.
 
     Args:
       chunks: The list of word chunks.
+      forward: Concatenation direction.
 
     Returns:
       The processed word chunks.

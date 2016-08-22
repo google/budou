@@ -37,7 +37,8 @@ setup(
     tests_require=[
         'mock>=2.0.0',
     ],
-    classifiers = [
+    test_suite='test',
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
