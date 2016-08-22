@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2016 Google Inc. All rights reserved
+# Copyright 2016 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,41 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
+import budou
 from lxml import html
 from mock import MagicMock
-import budou
-import logging
-import unittest
 
 DEFAULT_SENTENCE = u'今日は晴れ。'
 
-DEFAULT_TOKENS = [{
-    u'text': {u'content': u'今日', u'beginOffset': 0},
-    u'dependencyEdge': {u'headTokenIndex': 2, u'label': u'NN'},
-    u'partOfSpeech': {u'tag': u'NOUN'},
-    u'lemma': u'今日'
-  },
-  {
-    u'text': {u'content': u'は', u'beginOffset': 2},
-    u'dependencyEdge': {u'headTokenIndex': 0, u'label': u'PRT'},
-    u'partOfSpeech': {u'tag': u'PRT'},
-    u'lemma': u'は'
-  },
-  {
-    u'text': {u'content': u'晴れ', u'beginOffset': 3},
-    u'dependencyEdge': {u'headTokenIndex': 2, u'label': u'ROOT'},
-    u'partOfSpeech': {u'tag': u'NOUN'},
-    u'lemma': u'晴れ'
-  },
-  {
-    u'text': {u'content': u'。', u'beginOffset': 5},
-    u'dependencyEdge': {u'headTokenIndex': 2, u'label': u'P'},
-    u'partOfSpeech': {u'tag': u'PUNCT'},
-    u'lemma': u'。'
-  }]
+DEFAULT_TOKENS = [
+    {
+        u'text': {u'content': u'今日', u'beginOffset': 0},
+        u'dependencyEdge': {u'headTokenIndex': 2, u'label': u'NN'},
+        u'partOfSpeech': {u'tag': u'NOUN'},
+        u'lemma': u'今日'
+    },
+    {
+        u'text': {u'content': u'は', u'beginOffset': 2},
+        u'dependencyEdge': {u'headTokenIndex': 0, u'label': u'PRT'},
+        u'partOfSpeech': {u'tag': u'PRT'},
+        u'lemma': u'は'
+    },
+    {
+        u'text': {u'content': u'晴れ', u'beginOffset': 3},
+        u'dependencyEdge': {u'headTokenIndex': 2, u'label': u'ROOT'},
+        u'partOfSpeech': {u'tag': u'NOUN'},
+        u'lemma': u'晴れ'
+    },
+    {
+        u'text': {u'content': u'。', u'beginOffset': 5},
+        u'dependencyEdge': {u'headTokenIndex': 2, u'label': u'P'},
+        u'partOfSpeech': {u'tag': u'PUNCT'},
+        u'lemma': u'。'
+    }]
 
 
 class TestBudouMethods(unittest.TestCase):
+
   def setUp(self):
     self.parser = budou.Budou(None)
     # Mocks external API request.
@@ -60,12 +61,12 @@ class TestBudouMethods(unittest.TestCase):
 
   def test_process(self):
     expected_chunks = [
-      budou.Chunk(u'今日は', u'NOUN', u'NN', True),
-      budou.Chunk(u'晴れ。', u'NOUN', u'ROOT', False)
+        budou.Chunk(u'今日は', u'NOUN', u'NN', True),
+        budou.Chunk(u'晴れ。', u'NOUN', u'ROOT', False)
     ]
 
     expected_html_code = (u'<span class="ww">今日は</span>'
-                        u'<span class="ww">晴れ。</span>')
+                          u'<span class="ww">晴れ。</span>')
 
     result = self.parser.Process(DEFAULT_SENTENCE)
 
@@ -92,10 +93,10 @@ class TestBudouMethods(unittest.TestCase):
 
   def test_get_source_chunks(self):
     expected = [
-      budou.Chunk(u'今日', u'NOUN', u'NN', True),
-      budou.Chunk(u'は', u'PRT', u'PRT', False),
-      budou.Chunk(u'晴れ', u'NOUN', u'ROOT', False),
-      budou.Chunk(u'。', u'PUNCT', u'P', False),
+        budou.Chunk(u'今日', u'NOUN', u'NN', True),
+        budou.Chunk(u'は', u'PRT', u'PRT', False),
+        budou.Chunk(u'晴れ', u'NOUN', u'ROOT', False),
+        budou.Chunk(u'。', u'PUNCT', u'P', False),
     ]
     result = self.parser._GetSourceChunks(DEFAULT_SENTENCE)
     self.assertEqual(
@@ -106,15 +107,15 @@ class TestBudouMethods(unittest.TestCase):
     source = u'こ<a>ちらを</a>クリック'
     dom = html.fragment_fromstring(source, create_parent='body')
     chunks = [
-      budou.Chunk(u'こちら', u'PRON', u'NSUBJ', True),
-      budou.Chunk(u'を', u'PRT', u'PRT', False),
-      budou.Chunk(u'クリック', u'NOUN', u'ROOT', False),
+        budou.Chunk(u'こちら', u'PRON', u'NSUBJ', True),
+        budou.Chunk(u'を', u'PRT', u'PRT', False),
+        budou.Chunk(u'クリック', u'NOUN', u'ROOT', False),
     ]
     expected = [
-      budou.Chunk(
-          u'こ<a>ちらを</a>', budou.HTML_POS,
-          budou.HTML_POS, True),
-      budou.Chunk(u'クリック', u'NOUN', u'ROOT', False),
+        budou.Chunk(
+            u'こ<a>ちらを</a>', budou.HTML_POS,
+            budou.HTML_POS, True),
+        budou.Chunk(u'クリック', u'NOUN', u'ROOT', False),
     ]
     result = self.parser._MigrateHTML(chunks, dom)
     self.assertEqual(
@@ -125,7 +126,7 @@ class TestBudouMethods(unittest.TestCase):
     source = u'<a>こちら</a>をクリック'
     dom = html.fragment_fromstring(source, create_parent='body')
     expected = [
-      budou.Element(u'こちら', 'a', u'<a>こちら</a>', 0)
+        budou.Element(u'こちら', 'a', u'<a>こちら</a>', 0)
     ]
     result = self.parser._GetElementsList(dom)
     self.assertEqual(
@@ -134,9 +135,9 @@ class TestBudouMethods(unittest.TestCase):
 
   def test_spanize(self):
     chunks = [
-      budou.Chunk(u'a', None, None, None),
-      budou.Chunk(u'b', None, None, None),
-      budou.Chunk(u'c', None, None, None),
+        budou.Chunk(u'a', None, None, None),
+        budou.Chunk(u'b', None, None, None),
+        budou.Chunk(u'c', None, None, None),
     ]
     classname = 'foo'
     expected = (
@@ -150,13 +151,13 @@ class TestBudouMethods(unittest.TestCase):
 
   def test_concatenate_chunks(self):
     chunks = [
-      budou.Chunk(u'a', None, budou.TARGET_LABEL[0], True),
-      budou.Chunk(u'b', None, budou.TARGET_LABEL[1], False),
-      budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
+        budou.Chunk(u'a', None, budou.TARGET_LABEL[0], True),
+        budou.Chunk(u'b', None, budou.TARGET_LABEL[1], False),
+        budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
     ]
     expected_forward_concat = [
-      budou.Chunk(u'ab', None, budou.TARGET_LABEL[1], False),
-      budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
+        budou.Chunk(u'ab', None, budou.TARGET_LABEL[1], False),
+        budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
     ]
     result = self.parser._ConcatenateChunks(chunks, True)
     self.assertEqual(
@@ -164,8 +165,8 @@ class TestBudouMethods(unittest.TestCase):
         'Forward directional chunks should be concatenated to following '
         'chunks.')
     expected_backward_concat = [
-      budou.Chunk(u'ab', None, budou.TARGET_LABEL[0], True),
-      budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
+        budou.Chunk(u'ab', None, budou.TARGET_LABEL[0], True),
+        budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
     ]
     result = self.parser._ConcatenateChunks(chunks, False)
     self.assertEqual(
