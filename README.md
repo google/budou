@@ -19,7 +19,8 @@ import budou
 parser = budou.login('/path/to/credentials.json')
 result = parser.Process(u'今日も元気です', 'wordwrap')
 print result['html_code']     # => "<span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>"
-print result['chunks']        # => "[Chunk(word='今日も', pos='NOUN', label='NN', forward=True), Chunk(word='元気です', pos='NOUN', label='ROOT', forward=False)]"
+print result['chunks'][0]     # => "Chunk(word='今日も', pos='NOUN', label='NN', forward=True)"
+print result['chunks'][1]     # => "Chunk(word='元気です', pos='NOUN', label='ROOT', forward=False)]"
 
 ```
 

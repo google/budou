@@ -34,6 +34,9 @@ setup(
     scripts=[
         'budou/budou.py',
     ],
+    tests_require=[
+        'mock>=2.0.0',
+    ],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Operating System :: OS Independent',

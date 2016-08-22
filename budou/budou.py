@@ -22,7 +22,6 @@ import cgi
 import collections
 import httplib2
 import json
-import oauth2client.client
 import oauth2client.service_account
 import re
 
@@ -57,23 +56,13 @@ class Budou(object):
     self.driver = driver
 
   @classmethod
-  def login(cls, json_path=None, json_text=None):
-    if json_text is None:
-      with open(json_path, 'r') as f:
-        json_text = f.read()
-    json_data = json.loads(json_text)
-    if '_module' in json_data:
-      credentials = oauth2client.client.Credentials.new_from_json(json_text)
-    elif 'private_key' in json_data:
-      credentials = (
-          oauth2client.service_account.ServiceAccountCredentials
-          .from_json_keyfile_dict(json_data))
-    else:
-      raise ValueError('unrecognized credential format')
-    scoped_credentials = credentials.create_scoped(
-          ['https://www.googleapis.com/auth/cloud-platform'])
+  def login(cls, json_path):
+    credentials = (
+        oauth2client.service_account.ServiceAccountCredentials
+        .from_json_keyfile_name(json_path, scopes=[
+          'https://www.googleapis.com/auth/cloud-platform']))
     http = httplib2.Http()
-    scoped_credentials.authorize(http)
+    credentials.authorize(http)
     driver = discovery.build('language', 'v1beta1', http=http)
     return cls(driver)
 
@@ -88,7 +77,12 @@ class Budou(object):
       A dictionary with the list of word chunks and organized HTML code.
     """
     source = self._Preprocess(source)
-    chunks = self._GetProcessedChunks(source)
+    dom = html.fragment_fromstring(source, create_parent='body')
+    input_text = dom.text_content()
+    chunks = self._GetSourceChunks(input_text)
+    chunks = self._ConcatenateChunks(chunks, True)
+    chunks = self._ConcatenateChunks(chunks, False)
+    chunks = self._MigrateHTML(chunks, dom)
     html_code = self._Spanize(chunks, classname)
     result_value = {
         'chunks': chunks,
@@ -131,24 +125,6 @@ class Budou(object):
     source = re.sub(r'<br\s*\/?\s*>', u' ', source, re.I)
     source = re.sub(r'\s\s+', u' ', source)
     return source
-
-
-  def _GetProcessedChunks(self, source):
-    """Returns the processed chunks from the input HTML code.
-
-    Args:
-      source: HTML code to be processed (unicode).
-
-    Returns:
-      A list of word chunk objects (list).
-    """
-    dom = html.fragment_fromstring(source, create_parent='body')
-    input_text = dom.text_content()
-    chunks = self._GetSourceChunks(input_text)
-    chunks = self._ConcatenateChunks(chunks, True)
-    chunks = self._ConcatenateChunks(chunks, False)
-    chunks = self._MigrateHTML(chunks, dom)
-    return chunks
 
 
   def _GetSourceChunks(self, input_text):
@@ -200,12 +176,12 @@ class Budou(object):
               element.index + len(element.text) <= index + len(chunk.word)):
           result.append(Chunk(
               chunk.word.replace(element.text, element.source),
-              HTML_POS))
+              HTML_POS, HTML_POS, True))
         elif index < element.index + len(element.text) <= index + len(chunk.word):
           concat_chunks.append(chunk)
           new_word = u''.join([c_chunk.word for c_chunk in concat_chunks])
           new_word = new_word.replace(element.text, element.source)
-          result.append(Chunk(new_word, HTML_POS))
+          result.append(Chunk(new_word, HTML_POS, HTML_POS, True))
           concat_chunks = []
         else:
           concat_chunks.append(chunk)
@@ -281,5 +257,6 @@ class Budou(object):
       new_word = ''.join([tmp_chunk.word for tmp_chunk in tmp_bucket])
       result.append(Chunk(new_word, chunk.pos, chunk.label, chunk.forward))
       tmp_bucket = []
+    if tmp_bucket: result += tmp_bucket
     if not forward: result = result[::-1]
     return result

@@ -15,5 +15,13 @@
 
 """Package indicator for budou."""
 from .budou import Budou
-login = Budou.login
+from .budou import Chunk
+from .budou import Element
+from .budou import HTML_POS
+from .budou import TARGET_LABEL
 
+login = Budou.login
+Chunk = Chunk
+Element = Element
+HTML_POS = HTML_POS
+TARGET_LABEL = TARGET_LABEL
