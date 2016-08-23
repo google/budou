@@ -20,7 +20,7 @@ from .budou import Element
 from .budou import HTML_POS
 from .budou import TARGET_LABEL
 
-login = Budou.login
+authenticate = Budou.authenticate
 Chunk = Chunk
 Element = Element
 HTML_POS = HTML_POS

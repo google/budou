@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import budou
 from lxml import html
 from mock import MagicMock
+import unittest
 
 DEFAULT_SENTENCE = u'今日は晴れ。'
 
@@ -53,7 +53,7 @@ class TestBudouMethods(unittest.TestCase):
   def setUp(self):
     self.parser = budou.Budou(None)
     # Mocks external API request.
-    self.parser._GetAnnotations = MagicMock(
+    self.parser._get_annotations = MagicMock(
         return_value=DEFAULT_TOKENS)
 
   def tearDown(self):
@@ -68,7 +68,7 @@ class TestBudouMethods(unittest.TestCase):
     expected_html_code = (u'<span class="ww">今日は</span>'
                           u'<span class="ww">晴れ。</span>')
 
-    result = self.parser.Process(DEFAULT_SENTENCE)
+    result = self.parser.parse(DEFAULT_SENTENCE)
 
     self.assertIn(
         'chunks', result,
@@ -86,7 +86,7 @@ class TestBudouMethods(unittest.TestCase):
   def test_preprocess(self):
     source = u' a\nb<br> c   d'
     expected = u'ab c d'
-    result = self.parser._Preprocess(source)
+    result = self.parser._preprocess(source)
     self.assertEqual(
         expected, result,
         'BR tags, line breaks, and unnecessary spaces should be removed.')
@@ -98,7 +98,7 @@ class TestBudouMethods(unittest.TestCase):
         budou.Chunk(u'晴れ', u'NOUN', u'ROOT', False),
         budou.Chunk(u'。', u'PUNCT', u'P', False),
     ]
-    result = self.parser._GetSourceChunks(DEFAULT_SENTENCE)
+    result = self.parser._get_source_chunks(DEFAULT_SENTENCE)
     self.assertEqual(
         expected, result,
         'Input sentence should be processed into source chunks.')
@@ -117,7 +117,7 @@ class TestBudouMethods(unittest.TestCase):
             budou.HTML_POS, True),
         budou.Chunk(u'クリック', u'NOUN', u'ROOT', False),
     ]
-    result = self.parser._MigrateHTML(chunks, dom)
+    result = self.parser._migrate_html(chunks, dom)
     self.assertEqual(
         expected, result,
         'The HTML source code should be migrated into the chunk list.')
@@ -128,7 +128,7 @@ class TestBudouMethods(unittest.TestCase):
     expected = [
         budou.Element(u'こちら', 'a', u'<a>こちら</a>', 0)
     ]
-    result = self.parser._GetElementsList(dom)
+    result = self.parser._get_elements_list(dom)
     self.assertEqual(
         result, expected,
         'The input DOM should be processed to an element list.')
@@ -144,7 +144,7 @@ class TestBudouMethods(unittest.TestCase):
         u'<span class="foo">a</span>'
         '<span class="foo">b</span>'
         '<span class="foo">c</span>')
-    result = self.parser._Spanize(chunks, classname)
+    result = self.parser._spanize(chunks, classname)
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
@@ -159,7 +159,7 @@ class TestBudouMethods(unittest.TestCase):
         budou.Chunk(u'ab', None, budou.TARGET_LABEL[1], False),
         budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
     ]
-    result = self.parser._ConcatenateChunks(chunks, True)
+    result = self.parser._concatenate_chunks(chunks, True)
     self.assertEqual(
         result, expected_forward_concat,
         'Forward directional chunks should be concatenated to following '
@@ -168,7 +168,7 @@ class TestBudouMethods(unittest.TestCase):
         budou.Chunk(u'ab', None, budou.TARGET_LABEL[0], True),
         budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
     ]
-    result = self.parser._ConcatenateChunks(chunks, False)
+    result = self.parser._concatenate_chunks(chunks, False)
     self.assertEqual(
         result, expected_backward_concat,
         'Backward directional chunks should be concatenated to preceding '

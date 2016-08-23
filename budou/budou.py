@@ -16,12 +16,12 @@
 
 import cgi
 import collections
-import re
 from googleapiclient import discovery
 import httplib2
 from lxml import etree
 from lxml import html
 import oauth2client.service_account
+import re
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
 """Word chunk object.
@@ -60,7 +60,7 @@ class Budou(object):
     self.service = service
 
   @classmethod
-  def login(cls, json_path):
+  def authenticate(cls, json_path):
     credentials = (
         oauth2client.service_account.ServiceAccountCredentials
         .from_json_keyfile_name(json_path, scopes=[
@@ -70,8 +70,8 @@ class Budou(object):
     service = discovery.build('language', 'v1beta1', http=http)
     return cls(service)
 
-  def Process(self, source, classname=DEFAULT_CLASS_NAME):
-    """Processes input HTML code into parsed word chunks and organized code.
+  def parse(self, source, classname=DEFAULT_CLASS_NAME):
+    """Parses input HTML code into word chunks and organized code.
 
     Args:
       source: HTML code to be processed (unicode).
@@ -80,21 +80,21 @@ class Budou(object):
     Returns:
       A dictionary with the list of word chunks and organized HTML code.
     """
-    source = self._Preprocess(source)
+    source = self._preprocess(source)
     dom = html.fragment_fromstring(source, create_parent='body')
     input_text = dom.text_content()
-    chunks = self._GetSourceChunks(input_text)
-    chunks = self._ConcatenateChunks(chunks, True)
-    chunks = self._ConcatenateChunks(chunks, False)
-    chunks = self._MigrateHTML(chunks, dom)
-    html_code = self._Spanize(chunks, classname)
+    chunks = self._get_source_chunks(input_text)
+    chunks = self._concatenate_chunks(chunks, True)
+    chunks = self._concatenate_chunks(chunks, False)
+    chunks = self._migrate_html(chunks, dom)
+    html_code = self._spanize(chunks, classname)
     result_value = {
         'chunks': chunks,
         'html_code': html_code
     }
     return result_value
 
-  def _GetAnnotations(self, text, encoding='UTF32'):
+  def _get_annotations(self, text, encoding='UTF32'):
     """Returns the list of annotations from the given text."""
     body = {
         'document': {
@@ -111,7 +111,7 @@ class Budou(object):
     response = request.execute()
     return response.get('tokens', [])
 
-  def _Preprocess(self, source):
+  def _preprocess(self, source):
     """Removes unnecessary break lines and whitespaces.
 
     Args:
@@ -125,7 +125,7 @@ class Budou(object):
     source = re.sub(r'\s\s+', u' ', source)
     return source
 
-  def _GetSourceChunks(self, input_text):
+  def _get_source_chunks(self, input_text):
     """Returns the words chunks.
 
     Args:
@@ -136,7 +136,7 @@ class Budou(object):
     """
     chunks = []
     sentence_length = 0
-    tokens = self._GetAnnotations(input_text)
+    tokens = self._get_annotations(input_text)
     for token in tokens:
       word = token['text']['content']
       begin_offset = token['text']['beginOffset']
@@ -151,7 +151,7 @@ class Budou(object):
       sentence_length += len(word)
     return chunks
 
-  def _MigrateHTML(self, chunks, dom):
+  def _migrate_html(self, chunks, dom):
     """Migrates HTML elements to the word chunks by bracketing each element.
 
     Args:
@@ -161,7 +161,7 @@ class Budou(object):
     Returns:
       A list of processed word chunks.
     """
-    elements = self._GetElementsList(dom)
+    elements = self._get_elements_list(dom)
     for element in elements:
       result = []
       index = 0
@@ -188,7 +188,7 @@ class Budou(object):
       chunks = result
     return chunks
 
-  def _GetElementsList(self, dom):
+  def _get_elements_list(self, dom):
     """Digs DOM to the first depth and returns the list of elements.
 
     Args:
@@ -212,7 +212,7 @@ class Budou(object):
       if element.tail: index += len(element.tail)
     return result
 
-  def _Spanize(self, chunks, classname):
+  def _spanize(self, chunks, classname):
     """Returns concatenated HTML code with SPAN tag.
 
     Args:
@@ -231,7 +231,7 @@ class Budou(object):
             cgi.escape(classname, quote=True), chunk.word))
     return ''.join(result)
 
-  def _ConcatenateChunks(self, chunks, forward=True):
+  def _concatenate_chunks(self, chunks, forward=True):
     """Concatenates chunks based on the direction.
 
     Args:
