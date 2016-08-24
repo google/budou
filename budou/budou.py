@@ -20,6 +20,7 @@ from googleapiclient import discovery
 import httplib2
 from lxml import etree
 from lxml import html
+from oauth2client.client import GoogleCredentials
 import oauth2client.service_account
 import re
 
@@ -60,13 +61,28 @@ class Budou(object):
     self.service = service
 
   @classmethod
-  def authenticate(cls, json_path):
-    credentials = (
-        oauth2client.service_account.ServiceAccountCredentials
-        .from_json_keyfile_name(json_path, scopes=[
-            'https://www.googleapis.com/auth/cloud-platform']))
+  def authenticate(cls, json_path=None):
+    """Authenticates user for Cloud Natural Language API and returns the parser.
+    If the credential file path is not given, this tries to generate credentials
+    from default settings.
+
+    Args:
+      json_path: A file path to a credential JSON file for a Google Cloud Project
+      which Cloud Natural Language API is enabled (string, optional).
+
+    Returns:
+      Budou module.
+    """
+    if json_path:
+      credentials = (
+          oauth2client.service_account.ServiceAccountCredentials
+          .from_json_keyfile_name(json_path))
+    else:
+      credentials = GoogleCredentials.get_application_default()
+    scoped_credentials = credentials.create_scoped(
+        ['https://www.googleapis.com/auth/cloud-platform'])
     http = httplib2.Http()
-    credentials.authorize(http)
+    scoped_credentials.authorize(http)
     service = discovery.build('language', 'v1beta1', http=http)
     return cls(service)
 
@@ -258,7 +274,6 @@ class Budou(object):
     if tmp_bucket: result += tmp_bucket
     result = result[::-1]
     return result
-
 
   def _concatenate_by_label(self, chunks, forward=True):
     """Concatenates chunks based on the label and direction.
