@@ -84,8 +84,9 @@ class Budou(object):
     dom = html.fragment_fromstring(source, create_parent='body')
     input_text = dom.text_content()
     chunks = self._get_source_chunks(input_text)
-    chunks = self._concatenate_chunks(chunks, True)
-    chunks = self._concatenate_chunks(chunks, False)
+    chunks = self._concatenate_punctuations(chunks)
+    chunks = self._concatenate_by_label(chunks, True)
+    chunks = self._concatenate_by_label(chunks, False)
     chunks = self._migrate_html(chunks, dom)
     html_code = self._spanize(chunks, classname)
     result_value = {
@@ -231,8 +232,36 @@ class Budou(object):
             cgi.escape(classname, quote=True), chunk.word))
     return ''.join(result)
 
-  def _concatenate_chunks(self, chunks, forward=True):
-    """Concatenates chunks based on the direction.
+  def _concatenate_punctuations(self, chunks):
+    """Concatenates chunks backword if they are punctuation marks.
+
+    Args:
+      chunks: The list of word chunks.
+
+    Returns:
+      The processed word chunks.
+    """
+    result = []
+    tmp_bucket = []
+    chunks = chunks[::-1]
+    for chunk in chunks:
+      if chunk.pos == u'PUNCT':
+        tmp_bucket.append(chunk)
+        continue
+      if tmp_bucket:
+        tmp_bucket.append(chunk)
+        new_word = ''.join([tmp_chunk.word for tmp_chunk in tmp_bucket[::-1]])
+        result.append(Chunk(new_word, chunk.pos, chunk.label, chunk.forward))
+        tmp_bucket = []
+      else:
+        result.append(chunk)
+    if tmp_bucket: result += tmp_bucket
+    result = result[::-1]
+    return result
+
+
+  def _concatenate_by_label(self, chunks, forward=True):
+    """Concatenates chunks based on the label and direction.
 
     Args:
       chunks: The list of word chunks.
