@@ -9,10 +9,7 @@ Budou uses [Cloud Natural Language API](https://cloud.google.com/natural-languag
 words to produce meaningful chunks utilizing PoS (part-of-speech) tagging and syntactic information.
 
 ## Setup
-Install the library by running
-```
-(sudo) python setup.py install
-```
+Install the library by running ` pip install budou`.
 Also, a credential json file is needed for authorization to Cloud Natural Language API.
 
 ## How to use
@@ -36,14 +33,11 @@ Shuhei Iitsuka
 
 
 ## Disclaimer
-----------
-
 This library is authored by a Googler and copyrighted by Google, but
 is not an official Google product.
 
 
 ## License
-
 Copyright 2016 Google Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
