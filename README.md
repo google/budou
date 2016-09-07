@@ -2,15 +2,17 @@
 Budou provides beautiful CJK typography for websites with meaningful line breaks.
 
 East Asian Language text, aka CJK (Chinese Japanese and Korean), has some line breaking rules to provide beautiful typography.
-However, this is non-trivial process which requires a large dictionary and consideration of syntactic and semantic constraints.
-Budou automatically translates sentences into organized HTML code, with meaningful chunks wrapped in non-breaking markup
+However, this is a non-trivial process which requires a large dictionary and consideration of syntactic and semantic constraints.
+Budou automatically translates sentences into organized HTML code with meaningful chunks wrapped in non-breaking markup
 so as to semantically control line breaks.
 Budou uses [Cloud Natural Language API](https://cloud.google.com/natural-language/) to parse the input sentence and concatenate
 words to produce meaningful chunks utilizing PoS (part-of-speech) tagging and syntactic information.
 
+
 ## Setup
 Install the library by running ` pip install budou`.
 Also, a credential json file is needed for authorization to Cloud Natural Language API.
+
 
 ## How to use
 ```python
@@ -21,8 +23,11 @@ result = parser.parse(u'今日も元気です', 'wordwrap')
 print result['html_code']     # => "<span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>"
 print result['chunks'][0]     # => "Chunk(word='今日も', pos='NOUN', label='NN', forward=True)"
 print result['chunks'][1]     # => "Chunk(word='元気です', pos='NOUN', label='ROOT', forward=False)]"
-
 ```
+
+
+## How it works
+![Nexus Example Image](https://raw.githubusercontent.com/wiki/google/budou/images/nexus_example.jpeg)
 
 
 ## Author
