@@ -30,6 +30,12 @@ print result['chunks'][1]     # => "Chunk(word='元気です', pos='NOUN', label
 ![Nexus Example Image](https://raw.githubusercontent.com/wiki/google/budou/images/nexus_example.jpeg)
 
 
+## Supported Language
+- Japanese
+
+The language coverage depends on Cloud Natural Language API support.
+
+
 ## Author
 Shuhei Iitsuka
 
