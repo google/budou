@@ -23,6 +23,8 @@ from lxml import html
 from oauth2client.client import GoogleCredentials
 import oauth2client.service_account
 import re
+import shelve
+import hashlib
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
 """Word chunk object.
@@ -48,6 +50,8 @@ SPACE_POS = 'SPACE'
 HTML_POS = 'HTML'
 DEFAULT_CLASS_NAME = 'ww'
 TARGET_LABEL = ('P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'MWV', 'AUXPASS', 'AUXVV')
+CACHE_SALT = '2016-09-13'
+CACHE_FILE_NAME = 'budou-cache'
 
 
 class Budou(object):
@@ -86,16 +90,23 @@ class Budou(object):
     service = discovery.build('language', 'v1beta1', http=http)
     return cls(service)
 
-  def parse(self, source, classname=DEFAULT_CLASS_NAME):
+  def parse(self, source, classname=DEFAULT_CLASS_NAME, use_cache=True):
     """Parses input HTML code into word chunks and organized code.
 
     Args:
       source: HTML code to be processed (unicode).
       classname: A class name of each word chunk in the HTML code (string).
+      user_cache: Whether to use cache (boolean).
 
     Returns:
       A dictionary with the list of word chunks and organized HTML code.
     """
+    if use_cache:
+      cache_shelve = shelve.open(CACHE_FILE_NAME)
+      cache_key = self._get_cache_key(source, classname)
+      result_value = cache_shelve.get(cache_key, None)
+      cache_shelve.close()
+      if result_value: return result_value
     source = self._preprocess(source)
     dom = html.fragment_fromstring(source, create_parent='body')
     input_text = dom.text_content()
@@ -109,7 +120,18 @@ class Budou(object):
         'chunks': chunks,
         'html_code': html_code
     }
+    if use_cache:
+      cache_shelve = shelve.open(CACHE_FILE_NAME)
+      cache_shelve[cache_key] = result_value
+      cache_shelve.close()
     return result_value
+
+  def _get_cache_key(self, source, classname):
+    """Returns a cache key for the given source and class name."""
+    key_source = '%s:%s:%s' % (
+        CACHE_SALT, source.encode('utf8'), classname.encode('utf8'))
+    return hashlib.md5(key_source).hexdigest()
+
 
   def _get_annotations(self, text, encoding='UTF32'):
     """Returns the list of annotations from the given text."""
