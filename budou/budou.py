@@ -130,7 +130,7 @@ class Budou(object):
     """Returns a cache key for the given source and class name."""
     key_source = '%s:%s:%s' % (
         CACHE_SALT, source.encode('utf8'), classname.encode('utf8'))
-    return hashlib.md5(key_source).hexdigest()
+    return hashlib.md5(key_source.encode()).hexdigest()
 
 
   def _get_annotations(self, text, encoding='UTF32'):
