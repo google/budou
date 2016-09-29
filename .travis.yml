@@ -1,0 +1,5 @@
+language: python
+python: 2.7
+install:
+  - pip install setuptools==28.0.0
+script: python setup.py test
