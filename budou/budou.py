@@ -90,13 +90,15 @@ class Budou(object):
     service = discovery.build('language', 'v1beta1', http=http)
     return cls(service)
 
-  def parse(self, source, classname=DEFAULT_CLASS_NAME, use_cache=True):
+  def parse(self, source, classname=DEFAULT_CLASS_NAME, use_cache=True,
+            language=''):
     """Parses input HTML code into word chunks and organized code.
 
     Args:
       source: HTML code to be processed (unicode).
       classname: A class name of each word chunk in the HTML code (string).
       user_cache: Whether to use cache (boolean).
+      language: A language used to parse text (string).
 
     Returns:
       A dictionary with the list of word chunks and organized HTML code.
@@ -110,7 +112,7 @@ class Budou(object):
     source = self._preprocess(source)
     dom = html.fragment_fromstring(source, create_parent='body')
     input_text = dom.text_content()
-    chunks = self._get_source_chunks(input_text)
+    chunks = self._get_source_chunks(input_text, language)
     chunks = self._concatenate_punctuations(chunks)
     chunks = self._concatenate_by_label(chunks, True)
     chunks = self._concatenate_by_label(chunks, False)
@@ -132,7 +134,7 @@ class Budou(object):
     return hashlib.md5(key_source.encode('utf8')).hexdigest()
 
 
-  def _get_annotations(self, text, encoding='UTF32'):
+  def _get_annotations(self, text, language='', encoding='UTF32'):
     """Returns the list of annotations from the given text."""
     body = {
         'document': {
@@ -144,6 +146,9 @@ class Budou(object):
         },
         'encodingType': encoding,
     }
+
+    if language:
+        body['document']['language'] = language
 
     request = self.service.documents().annotateText(body=body)
     response = request.execute()
@@ -163,18 +168,19 @@ class Budou(object):
     source = re.sub(r'\s\s+', u' ', source)
     return source
 
-  def _get_source_chunks(self, input_text):
+  def _get_source_chunks(self, input_text, language=''):
     """Returns the words chunks.
 
     Args:
       input_text: An input text to annotate (unicode).
+      language: A language used to parse text (string).
 
     Returns:
       A list of word chunk objects (list).
     """
     chunks = []
     sentence_length = 0
-    tokens = self._get_annotations(input_text)
+    tokens = self._get_annotations(input_text, language)
     for token in tokens:
       word = token['text']['content']
       begin_offset = token['text']['beginOffset']
