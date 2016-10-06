@@ -1,16 +1,23 @@
-# Budou - CJK Line Break Organizer
-Budou provides beautiful CJK typography for websites with meaningful line breaks.
+# Budou - Automatic Japanese line breaking tool
+English uses spacing and hyphenation as cues to allow for beautiful line breaks.
+Japanese, which has none of these, is notoriously more difficult. Breaks occur randomly, usually in the middle of a word.
+This is a long standing issue in Japanese typography on web, and results in degradation of readability.
 
-East Asian Language text, aka CJK (Chinese Japanese and Korean), has some line breaking rules to provide beautiful typography.
-However, this is a non-trivial process which requires a large dictionary and consideration of syntactic and semantic constraints.
-Budou automatically translates sentences into organized HTML code with meaningful chunks wrapped in non-breaking markup
+Budou automatically translates Japanese sentences into organized HTML code with meaningful chunks wrapped in non-breaking markup
 so as to semantically control line breaks.
-Budou uses [Cloud Natural Language API](https://cloud.google.com/natural-language/) to parse the input sentence and concatenate
-words to produce meaningful chunks utilizing PoS (part-of-speech) tagging and syntactic information.
+Budou uses [Cloud Natural Language API](https://cloud.google.com/natural-language/) to analyze the input sentence,
+and it concatenates proper words in order to produce meaningful chunks utilizing PoS (part-of-speech) tagging and syntactic information.
+
+Budou outputs HTML code by wrapping the chunks with `SPAN` tag.
+By specifying their `display` property as `inline-block` in CSS, semantic units will no longer be split at the end of a line.
+
+Budou supports only Japanese currently, but support for other Asian languages with line break issues, such as Chinese and Thai,
+will be added as Cloud Natural Language API adds support.
 
 
 ## Setup
 Install the library by running ` pip install budou`.
+
 Also, a credential json file is needed for authorization to Cloud Natural Language API.
 
 
@@ -20,9 +27,23 @@ import budou
 # Login to Cloud Natural Language API with credentials
 parser = budou.authenticate('/path/to/credentials.json')
 result = parser.parse(u'今日も元気です', 'wordwrap')
+
 print result['html_code']     # => "<span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>"
+
 print result['chunks'][0]     # => "Chunk(word='今日も', pos='NOUN', label='NN', forward=True)"
 print result['chunks'][1]     # => "Chunk(word='元気です', pos='NOUN', label='ROOT', forward=False)]"
+```
+
+Semantic units in the output HTML will not be split at the end of line by conditioning each `SPAN` tag with `display: inline-block` in CSS.
+
+```html
+<span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>
+```
+
+```css
+.wordwrap {
+  display: inline-block;
+}
 ```
 
 
@@ -33,7 +54,7 @@ print result['chunks'][1]     # => "Chunk(word='元気です', pos='NOUN', label
 ## Supported Language
 - Japanese
 
-The language coverage depends on Cloud Natural Language API support.
+Support for other Asian languages with line break issues, such as Chinese and Thai, will be added as Cloud Natural Language API adds support.
 
 
 ## Author
