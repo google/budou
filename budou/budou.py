@@ -27,6 +27,7 @@ from oauth2client.client import GoogleCredentials
 import oauth2client.service_account
 import re
 import shelve
+import six
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
 """Word chunk object.
@@ -151,7 +152,7 @@ class Budou(object):
     Returns:
       A dictionary.
     """
-    if attributes and isinstance(attributes, basestring):
+    if attributes and isinstance(attributes, six.string_types):
       return {
           'class': attributes
       }
@@ -308,8 +309,9 @@ class Budou(object):
       if chunk.pos == SPACE_POS:
         result.append(chunk.word)
       else:
-        result.append(etree.tostring(
-            maker.span(chunk.word, attributes), encoding='utf8').decode('utf8'))
+        element = etree.Element('span', collections.OrderedDict(attributes))
+        element.text = chunk.word
+        result.append(etree.tostring(element, encoding='utf8').decode('utf8'))
     return ''.join(result)
 
   def _concatenate_punctuations(self, chunks):

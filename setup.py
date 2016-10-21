@@ -27,6 +27,7 @@ setup(
         'google-api-python-client',
         'oauth2client',
         'lxml==3.6.1',
+        'six',
     ],
     scripts=[
         'budou/budou.py',
