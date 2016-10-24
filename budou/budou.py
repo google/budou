@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # Copyright 2016 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +16,9 @@
 
 """Budou, an automatic CJK line break organizer."""
 
-import cgi
 import collections
 from googleapiclient import discovery
+import hashlib
 import httplib2
 from lxml import etree
 from lxml import html
@@ -24,7 +26,7 @@ from oauth2client.client import GoogleCredentials
 import oauth2client.service_account
 import re
 import shelve
-import hashlib
+import six
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
 """Word chunk object.
@@ -67,12 +69,13 @@ class Budou(object):
   @classmethod
   def authenticate(cls, json_path=None):
     """Authenticates user for Cloud Natural Language API and returns the parser.
+
     If the credential file path is not given, this tries to generate credentials
     from default settings.
 
     Args:
-      json_path: A file path to a credential JSON file for a Google Cloud Project
-      which Cloud Natural Language API is enabled (string, optional).
+      json_path: A file path to a credential JSON file for a Google Cloud
+      Project which Cloud Natural Language API is enabled (string, optional).
 
     Returns:
       Budou module.
@@ -90,22 +93,29 @@ class Budou(object):
     service = discovery.build('language', 'v1beta1', http=http)
     return cls(service)
 
-  def parse(self, source, classname=DEFAULT_CLASS_NAME, use_cache=True,
-            language=''):
+  def parse(self, source, attributes=None, use_cache=True, language='',
+            classname=DEFAULT_CLASS_NAME):
     """Parses input HTML code into word chunks and organized code.
 
     Args:
       source: HTML code to be processed (unicode).
-      classname: A class name of each word chunk in the HTML code (string).
-      user_cache: Whether to use cache (boolean).
-      language: A language used to parse text (string).
+      attributes: If a dictionary, then a map of name-value pairs for attributes
+      of output SPAN tags. If a string, then this is the class name of output
+      SPAN tags. If an array, the elements will be joined together as the class
+      name of SPAN tags (dictionary|string, optional).
+      use_cache: Whether to use cache (boolean, optional).
+      language: A language used to parse text (string, optional).
+      classname: A class name of output SPAN tags (string, optional).
+      **This argument is deprecated. Please use attributes arg instead.
+      When specified with the attributes arg, the class name in the attributes
+      arg will be used.**
 
     Returns:
       A dictionary with the list of word chunks and organized HTML code.
     """
     if use_cache:
       cache_shelve = shelve.open(CACHE_FILE_NAME)
-      cache_key = self._get_cache_key(source, classname)
+      cache_key = self._get_cache_key(source, language)
       result_value = cache_shelve.get(cache_key, None)
       cache_shelve.close()
       if result_value: return result_value
@@ -117,7 +127,8 @@ class Budou(object):
     chunks = self._concatenate_by_label(chunks, True)
     chunks = self._concatenate_by_label(chunks, False)
     chunks = self._migrate_html(chunks, dom)
-    html_code = self._spanize(chunks, classname)
+    attributes = self._get_attribute_dict(attributes, classname)
+    html_code = self._spanize(chunks, attributes)
     result_value = {
         'chunks': chunks,
         'html_code': html_code
@@ -128,11 +139,33 @@ class Budou(object):
       cache_shelve.close()
     return result_value
 
+  def _get_attribute_dict(self, attributes, classname=None):
+    """Returns a dictionary of attribute name-value pairs.
+
+    Args:
+      attributes: If a dictionary, then a map of name-value pairs for attributes
+      of output SPAN tags. If a string, then this is the class name of output
+      SPAN tags (dictionary|string).
+      classname: Optional class name (string, optional).
+
+    Returns:
+      A dictionary.
+    """
+    if attributes and isinstance(attributes, six.string_types):
+      return {
+          'class': attributes
+      }
+    if not attributes:
+      attributes = {}
+    if not classname:
+      classname = DEFAULT_CLASS_NAME
+    attributes.setdefault('class', classname)
+    return attributes
+
   def _get_cache_key(self, source, classname):
     """Returns a cache key for the given source and class name."""
     key_source = u'%s:%s:%s' % (CACHE_SALT, source, classname)
     return hashlib.md5(key_source.encode('utf8')).hexdigest()
-
 
   def _get_annotations(self, text, language='', encoding='UTF32'):
     """Returns the list of annotations from the given text."""
@@ -148,7 +181,7 @@ class Budou(object):
     }
 
     if language:
-        body['document']['language'] = language
+      body['document']['language'] = language
 
     request = self.service.documents().annotateText(body=body)
     response = request.execute()
@@ -256,12 +289,15 @@ class Budou(object):
       if element.tail: index += len(element.tail)
     return result
 
-  def _spanize(self, chunks, classname):
+  def _spanize(self, chunks, attributes):
     """Returns concatenated HTML code with SPAN tag.
 
     Args:
       chunks: The list of word chunks.
-      classname: The class name of SPAN tags.
+      attributes: If a dictionary, then a map of name-value pairs for attributes
+      of output SPAN tags. If a string, then this is the class name of output
+      SPAN tags. If an array, the elements will be joined together as the
+      class name of SPAN tags.
 
     Returns:
       The organized HTML code.
@@ -271,8 +307,9 @@ class Budou(object):
       if chunk.pos == SPACE_POS:
         result.append(chunk.word)
       else:
-        result.append(u'<span class="%s">%s</span>'%(
-            cgi.escape(classname, quote=True), chunk.word))
+        attribute_str = ' '.join(
+            '%s="%s"' % (k, v) for k, v in sorted(attributes.items()))
+        result.append('<span %s>%s</span>' % (attribute_str, chunk.word))
     return ''.join(result)
 
   def _concatenate_punctuations(self, chunks):

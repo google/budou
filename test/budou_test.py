@@ -60,6 +60,7 @@ class TestBudouMethods(unittest.TestCase):
     pass
 
   def test_process(self):
+    """Demonstrates standard usage."""
     expected_chunks = [
         budou.Chunk(u'今日は', u'NOUN', u'NN', True),
         budou.Chunk(u'晴れ。', u'NOUN', u'ROOT', False)
@@ -68,7 +69,36 @@ class TestBudouMethods(unittest.TestCase):
     expected_html_code = (u'<span class="ww">今日は</span>'
                           u'<span class="ww">晴れ。</span>')
 
-    result = self.parser.parse(DEFAULT_SENTENCE)
+    result = self.parser.parse(DEFAULT_SENTENCE, use_cache=False)
+
+    self.assertIn(
+        'chunks', result,
+        'Processed result should include chunks.')
+    self.assertIn(
+        'html_code', result,
+        'Processed result should include organized html code.')
+    self.assertEqual(
+        expected_chunks, result['chunks'],
+        'Processed result should include expected chunks.')
+    self.assertEqual(
+        expected_html_code, result['html_code'],
+        'Processed result should include expected html code.')
+
+  def test_process_with_aria(self):
+    """Demonstrates advanced usage considering accessibility."""
+    expected_chunks = [
+        budou.Chunk(u'今日は', u'NOUN', u'NN', True),
+        budou.Chunk(u'晴れ。', u'NOUN', u'ROOT', False)
+    ]
+
+    expected_html_code = (
+        u'<span aria-describedby="parent" class="text-chunk">今日は</span>'
+        u'<span aria-describedby="parent" class="text-chunk">晴れ。</span>')
+
+    result = self.parser.parse(DEFAULT_SENTENCE, {
+        'aria-describedby': 'parent',
+        'class': 'text-chunk'
+        }, use_cache=False)
 
     self.assertIn(
         'chunks', result,
@@ -139,12 +169,14 @@ class TestBudouMethods(unittest.TestCase):
         budou.Chunk(u'b', None, None, None),
         budou.Chunk(u'c', None, None, None),
     ]
-    classname = 'foo'
+    attributes = {
+        'class': 'foo'
+    }
     expected = (
         u'<span class="foo">a</span>'
         '<span class="foo">b</span>'
         '<span class="foo">c</span>')
-    result = self.parser._spanize(chunks, classname)
+    result = self.parser._spanize(chunks, attributes)
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
@@ -188,6 +220,66 @@ class TestBudouMethods(unittest.TestCase):
         result, expected_backward_concat,
         'Backward directional chunks should be concatenated to preceding '
         'chunks.')
+
+  def test_get_attribute_dict(self):
+    result = self.parser._get_attribute_dict({})
+    self.assertEqual(
+        result, {'class': budou.DEFAULT_CLASS_NAME},
+        'When attributes is none and classname is not provided, the output '
+        'should have the default class name in it.')
+
+    result = self.parser._get_attribute_dict('foo')
+    self.assertEqual(
+        result, {'class': 'foo'},
+        'When attributes is a string and classname is not provided, the output '
+        'should have the specified class name in it.')
+
+    result = self.parser._get_attribute_dict({'bizz': 'buzz'})
+    self.assertEqual(
+        result, {
+            'bizz': 'buzz',
+            'class': budou.DEFAULT_CLASS_NAME,
+        }, 'When attributes is a dictionary but class property is not '
+        'included, the output should have the default class name in it.')
+
+    result = self.parser._get_attribute_dict({'bizz': 'buzz', 'class': 'foo'})
+    self.assertEqual(
+        result, {
+            'bizz': 'buzz',
+            'class': 'foo',
+        }, 'When attribute is a dictionary and class property is included, '
+        'the output should have the specified class name in it.')
+
+    result = self.parser._get_attribute_dict({}, 'foo')
+    self.assertEqual(
+        result, {'class': 'foo'},
+        'When attributes is none and classname is provided, the output should '
+        'have classname as the class name.')
+
+    result = self.parser._get_attribute_dict('bar', 'foo')
+    self.assertEqual(
+        result, {'class': 'bar'},
+        'When attributes is a string and classname is provided, the output '
+        'should use the class property in attributes over classname.')
+
+    result = self.parser._get_attribute_dict({'bizz': 'buzz'}, 'foo')
+    self.assertEqual(
+        result, {
+            'bizz': 'buzz',
+            'class': 'foo',
+        }, 'When attributes is a dictionary without class property and '
+        'classname is provided, the output should have classname as the class '
+        'name.')
+
+    result = self.parser._get_attribute_dict(
+        {'bizz': 'buzz', 'class': 'bar'}, 'foo')
+    self.assertEqual(
+        result, {
+            'bizz': 'buzz',
+            'class': 'bar',
+        }, 'When attributes is a dictionary with class property and classname '
+        'is provided, the output should use the class property in attributes '
+        'over classname.')
 
 if __name__ == '__main__':
   unittest.main()
