@@ -92,8 +92,8 @@ class TestBudouMethods(unittest.TestCase):
     ]
 
     expected_html_code = (
-        u'<span class="text-chunk" aria-describedby="parent">今日は</span>'
-        u'<span class="text-chunk" aria-describedby="parent">晴れ。</span>')
+        u'<span aria-describedby="parent" class="text-chunk">今日は</span>'
+        u'<span aria-describedby="parent" class="text-chunk">晴れ。</span>')
 
     result = self.parser.parse(DEFAULT_SENTENCE, {
         'aria-describedby': 'parent',

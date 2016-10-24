@@ -22,7 +22,6 @@ import hashlib
 import httplib2
 from lxml import etree
 from lxml import html
-from lxml.builder import ElementMaker
 from oauth2client.client import GoogleCredentials
 import oauth2client.service_account
 import re
@@ -303,15 +302,14 @@ class Budou(object):
     Returns:
       The organized HTML code.
     """
-    maker = ElementMaker()
     result = []
     for chunk in chunks:
       if chunk.pos == SPACE_POS:
         result.append(chunk.word)
       else:
-        element = etree.Element('span', collections.OrderedDict(attributes))
-        element.text = chunk.word
-        result.append(etree.tostring(element, encoding='utf8').decode('utf8'))
+        attribute_str = ' '.join(
+            '%s="%s"' % (k, v) for k, v in sorted(attributes.items()))
+        result.append('<span %s>%s</span>' % (attribute_str, chunk.word))
     return ''.join(result)
 
   def _concatenate_punctuations(self, chunks):
