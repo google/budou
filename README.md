@@ -1,4 +1,6 @@
 # Budou - Automatic Japanese line breaking tool
+[![Build Status](https://travis-ci.org/google/budou.svg?branch=master)](https://travis-ci.org/google/budou)
+
 English uses spacing and hyphenation as cues to allow for beautiful line breaks.
 Japanese, which has none of these, is notoriously more difficult. Breaks occur randomly, usually in the middle of a word.
 This is a long standing issue in Japanese typography on web, and results in degradation of readability.
