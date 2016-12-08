@@ -16,16 +16,16 @@
 
 """Budou, an automatic CJK line break organizer."""
 
-import collections
+from .cachefactory import CacheFactory
 from googleapiclient import discovery
-import hashlib
-import httplib2
 from lxml import etree
 from lxml import html
 from oauth2client.client import GoogleCredentials
+import collections
+import hashlib
+import httplib2
 import oauth2client.service_account
 import re
-import shelve
 import six
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
@@ -52,8 +52,7 @@ SPACE_POS = 'SPACE'
 HTML_POS = 'HTML'
 DEFAULT_CLASS_NAME = 'ww'
 TARGET_LABEL = ('P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'MWV', 'AUXPASS', 'AUXVV')
-CACHE_SALT = '2016-09-13'
-CACHE_FILE_NAME = 'budou-cache'
+cache = CacheFactory.load()
 
 
 class Budou(object):
@@ -114,10 +113,7 @@ class Budou(object):
       A dictionary with the list of word chunks and organized HTML code.
     """
     if use_cache:
-      cache_shelve = shelve.open(CACHE_FILE_NAME)
-      cache_key = self._get_cache_key(source, language)
-      result_value = cache_shelve.get(cache_key, None)
-      cache_shelve.close()
+      result_value = cache.get(source, language)
       if result_value: return result_value
     source = self._preprocess(source)
     dom = html.fragment_fromstring(source, create_parent='body')
@@ -134,9 +130,7 @@ class Budou(object):
         'html_code': html_code
     }
     if use_cache:
-      cache_shelve = shelve.open(CACHE_FILE_NAME)
-      cache_shelve[cache_key] = result_value
-      cache_shelve.close()
+      cache.set(source, language, result_value)
     return result_value
 
   def _get_attribute_dict(self, attributes, classname=None):
@@ -161,11 +155,6 @@ class Budou(object):
       classname = DEFAULT_CLASS_NAME
     attributes.setdefault('class', classname)
     return attributes
-
-  def _get_cache_key(self, source, classname):
-    """Returns a cache key for the given source and class name."""
-    key_source = u'%s:%s:%s' % (CACHE_SALT, source, classname)
-    return hashlib.md5(key_source.encode('utf8')).hexdigest()
 
   def _get_annotations(self, text, language='', encoding='UTF32'):
     """Returns the list of annotations from the given text."""

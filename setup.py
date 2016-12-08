@@ -16,7 +16,7 @@ from setuptools import setup
 
 setup(
     name='budou',
-    version='0.1.2',
+    version='0.2.0',
     author='Shuhei Iitsuka',
     author_email='tushuhei@google.com',
     description='CJK Line Break Organizer',
@@ -33,7 +33,7 @@ setup(
         'budou/budou.py',
     ],
     tests_require=[
-        'mock>=2.0.0',
+        'mock',
     ],
     test_suite='test',
     classifiers=[

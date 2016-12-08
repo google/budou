@@ -18,6 +18,8 @@ import budou
 from lxml import html
 from mock import MagicMock
 import unittest
+import os
+from budou import config
 
 DEFAULT_SENTENCE = u'今日は晴れ。'
 
@@ -57,7 +59,8 @@ class TestBudouMethods(unittest.TestCase):
         return_value=DEFAULT_TOKENS)
 
   def tearDown(self):
-    pass
+    if os.path.exists(config.SHELVE_CACHE_FILE_NAME):
+      os.remove(config.SHELVE_CACHE_FILE_NAME)
 
   def test_process(self):
     """Demonstrates standard usage."""
@@ -220,6 +223,30 @@ class TestBudouMethods(unittest.TestCase):
         result, expected_backward_concat,
         'Backward directional chunks should be concatenated to preceding '
         'chunks.')
+
+  def test_cache(self):
+    expected_chunks = [
+        budou.Chunk(u'今日は', u'NOUN', u'NN', True),
+        budou.Chunk(u'晴れ。', u'NOUN', u'ROOT', False)
+    ]
+
+    expected_html_code = (u'<span class="ww">今日は</span>'
+                          u'<span class="ww">晴れ。</span>')
+
+    result = self.parser.parse(DEFAULT_SENTENCE, use_cache=True)
+
+    self.assertIn(
+        'chunks', result,
+        'Processed result should include chunks.')
+    self.assertIn(
+        'html_code', result,
+        'Processed result should include organized html code.')
+    self.assertEqual(
+        expected_chunks, result['chunks'],
+        'Processed result should include expected chunks.')
+    self.assertEqual(
+        expected_html_code, result['html_code'],
+        'Processed result should include expected html code.')
 
   def test_get_attribute_dict(self):
     result = self.parser._get_attribute_dict({})

@@ -1,9 +1,34 @@
 language: python
-python: 
-    - "2.7"
-    - "3.4"
-    - "3.5"
+
+# Cache our Gcloud SDK between commands
+cache:
+  directories:
+    - "$HOME/google-cloud-sdk/"
+
+env:
+# Make sure gcloud command is on our PATH and the App Engine SDK is in the Python path
+- GAE_PYTHONPATH=${HOME}/.cache/google_appengine PATH=$PATH:${HOME}/google-cloud-sdk/bin PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH} CLOUDSDK_CORE_DISABLE_PROMPTS=1
+
+python:
+- "2.7"
+- "3.4"
+- "3.5"
 
 install:
-  - pip install setuptools==28.0.0
-script: python setup.py test
+- pip install setuptools
+
+script:
+- python setup.py test
+# Install Google App Engine Python SDK
+- if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]] &&[ ! -d "${GAE_PYTHONPATH}" ]; then
+    python _travis/fetch_gae_sdk.py $(dirname "${GAE_PYTHONPATH}");
+  fi
+# If the SDK is not already cached, download it and unpack it
+- if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]] && [ ! -d ${HOME}/google-cloud-sdk ]; then
+    curl https://sdk.cloud.google.com | bash;
+  fi
+- if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
+    pip install --upgrade google-api-python-client;
+    pip install lxml;
+    python gae_test_runner.py ${GAE_PYTHONPATH} --test-path=test_gae;
+  fi
