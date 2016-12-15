@@ -14,24 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from budou.cachefactory import CacheFactory
-from budou.budoucache.shelvecache import ShelveCache
 import unittest
 import os
-from budou import config
+import budou
 
 class TestStandardCacheFactory(unittest.TestCase):
 
   def setUp(self):
-    self.cache = CacheFactory.load()
+    self.cache = budou.load_cache()
 
   def tearDown(self):
-    if os.path.isfile(config.SHELVE_CACHE_FILE_NAME):
-      os.remove(config.SHELVE_CACHE_FILE_NAME)
+    if os.path.isfile(budou.SHELVE_CACHE_FILE_NAME):
+      os.remove(budou.SHELVE_CACHE_FILE_NAME)
     del self.cache
 
   def test_load(self):
-    self.assertIsInstance(self.cache, ShelveCache,
+    cache_type = repr(self.cache)
+    self.assertEqual(cache_type, '<ShelveCache>',
         'Under non GAE environment, ShelveCache should be loaded.')
 
   def test_set_and_get(self):
@@ -39,7 +38,7 @@ class TestStandardCacheFactory(unittest.TestCase):
     language = 'a'
     target = 'banana'
     self.cache.set(source, language, target)
-    self.assertTrue(os.path.isfile(config.SHELVE_CACHE_FILE_NAME),
+    self.assertTrue(os.path.isfile(budou.SHELVE_CACHE_FILE_NAME),
         'Cache file should be generated.')
     self.assertEqual(self.cache.get(source, language), target,
         'The target should be cached.')

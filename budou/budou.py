@@ -16,11 +16,11 @@
 
 """Budou, an automatic CJK line break organizer."""
 
-from .cachefactory import CacheFactory
 from googleapiclient import discovery
 from lxml import etree
 from lxml import html
 from oauth2client.client import GoogleCredentials
+from . import cachefactory
 import collections
 import hashlib
 import httplib2
@@ -52,7 +52,7 @@ SPACE_POS = 'SPACE'
 HTML_POS = 'HTML'
 DEFAULT_CLASS_NAME = 'ww'
 TARGET_LABEL = ('P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'MWV', 'AUXPASS', 'AUXVV')
-cache = CacheFactory.load()
+cache = cachefactory.load_cache()
 
 
 class Budou(object):

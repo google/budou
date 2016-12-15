@@ -20,6 +20,9 @@ from .budou import Element
 from .budou import HTML_POS
 from .budou import TARGET_LABEL
 from .budou import DEFAULT_CLASS_NAME
+from .cachefactory import load_cache
+from .cachefactory import CACHE_SALT
+from .cachefactory import SHELVE_CACHE_FILE_NAME
 
 authenticate = Budou.authenticate
 Chunk = Chunk
@@ -27,3 +30,7 @@ Element = Element
 HTML_POS = HTML_POS
 TARGET_LABEL = TARGET_LABEL
 DEFAULT_CLASS_NAME = DEFAULT_CLASS_NAME
+
+load_cache = load_cache
+CACHE_SALT=CACHE_SALT
+SHELVE_CACHE_FILE_NAME=SHELVE_CACHE_FILE_NAME

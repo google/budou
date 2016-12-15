@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-from budou.budoucache.appenginecache import AppEngineCache
-from budou.cachefactory import CacheFactory
 from google.appengine.api import memcache
 from google.appengine.ext import testbed
+import budou
+import unittest
 
 class TestGAECacheFactory(unittest.TestCase):
 
@@ -30,13 +29,13 @@ class TestGAECacheFactory(unittest.TestCase):
     # Next, declare which service stubs you want to use.
     self.testbed.init_datastore_v3_stub()
     self.testbed.init_memcache_stub()
-    self.cache = CacheFactory.load()
+    self.cache = budou.load_cache()
 
   def tearDown(self):
     del self.cache
 
   def test_load(self):
-    self.assertIsInstance(self.cache, AppEngineCache,
+    self.assertEqual(repr(self.cache), '<AppEngineCache>',
         'Under GAE environment, AppEngineCache should be loaded.')
 
   def test_set_and_get(self):

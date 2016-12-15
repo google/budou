@@ -14,12 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import budou
 from lxml import html
 from mock import MagicMock
-import unittest
+import budou
 import os
-from budou import config
+import unittest
 
 DEFAULT_SENTENCE = u'今日は晴れ。'
 
@@ -59,8 +58,8 @@ class TestBudouMethods(unittest.TestCase):
         return_value=DEFAULT_TOKENS)
 
   def tearDown(self):
-    if os.path.exists(config.SHELVE_CACHE_FILE_NAME):
-      os.remove(config.SHELVE_CACHE_FILE_NAME)
+    if os.path.exists(budou.SHELVE_CACHE_FILE_NAME):
+      os.remove(budou.SHELVE_CACHE_FILE_NAME)
 
   def test_process(self):
     """Demonstrates standard usage."""
