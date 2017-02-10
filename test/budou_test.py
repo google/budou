@@ -20,7 +20,8 @@ import budou
 import os
 import unittest
 
-DEFAULT_SENTENCE = u'今日は晴れ。'
+DEFAULT_SENTENCE_JA = u'今日は晴れ。'
+DEFAULT_SENTENCE_KO = u'오늘은 맑음.'
 
 DEFAULT_TOKENS = [
     {
@@ -61,8 +62,8 @@ class TestBudouMethods(unittest.TestCase):
     if os.path.exists(budou.SHELVE_CACHE_FILE_NAME):
       os.remove(budou.SHELVE_CACHE_FILE_NAME)
 
-  def test_process(self):
-    """Demonstrates standard usage."""
+  def test_parse_ja(self):
+    """Demonstrates standard usage in Japanese."""
     expected_chunks = [
         budou.Chunk(u'今日は', u'NOUN', u'NN', True),
         budou.Chunk(u'晴れ。', u'NOUN', u'ROOT', False)
@@ -71,20 +72,36 @@ class TestBudouMethods(unittest.TestCase):
     expected_html_code = (u'<span class="ww">今日は</span>'
                           u'<span class="ww">晴れ。</span>')
 
-    result = self.parser.parse(DEFAULT_SENTENCE, use_cache=False)
+    result = self.parser.parse(
+        DEFAULT_SENTENCE_JA, language='ja', use_cache=False)
 
-    self.assertIn(
-        'chunks', result,
-        'Processed result should include chunks.')
-    self.assertIn(
-        'html_code', result,
-        'Processed result should include organized html code.')
     self.assertEqual(
         expected_chunks, result['chunks'],
-        'Processed result should include expected chunks.')
+        'Processed result should include expected chunks in Japanese.')
     self.assertEqual(
         expected_html_code, result['html_code'],
-        'Processed result should include expected html code.')
+        'Processed result should include expected html code in Japanese.')
+
+  def test_parse_ko(self):
+    """Demonstrates standard usage in Japanese."""
+    expected_chunks = [
+        budou.Chunk(u'오늘은', None, None, True),
+        budou.Chunk(' ', budou.SPACE_POS, budou.SPACE_POS, True),
+        budou.Chunk(u'맑음.', None, None, True)
+    ]
+
+    expected_html_code = (u'<span class="ww">오늘은</span> '
+                          u'<span class="ww">맑음.</span>')
+
+    result = self.parser.parse(
+        DEFAULT_SENTENCE_KO, language='ko', use_cache=False)
+
+    self.assertEqual(
+        expected_chunks, result['chunks'],
+        'Processed result should include expected chunks in Korean.')
+    self.assertEqual(
+        expected_html_code, result['html_code'],
+        'Processed result should include expected html code in Korean.')
 
   def test_process_with_aria(self):
     """Demonstrates advanced usage considering accessibility."""
@@ -97,17 +114,11 @@ class TestBudouMethods(unittest.TestCase):
         u'<span aria-describedby="parent" class="text-chunk">今日は</span>'
         u'<span aria-describedby="parent" class="text-chunk">晴れ。</span>')
 
-    result = self.parser.parse(DEFAULT_SENTENCE, {
+    result = self.parser.parse(DEFAULT_SENTENCE_JA, {
         'aria-describedby': 'parent',
         'class': 'text-chunk'
         }, use_cache=False)
 
-    self.assertIn(
-        'chunks', result,
-        'Processed result should include chunks.')
-    self.assertIn(
-        'html_code', result,
-        'Processed result should include organized html code.')
     self.assertEqual(
         expected_chunks, result['chunks'],
         'Processed result should include expected chunks.')
@@ -130,7 +141,7 @@ class TestBudouMethods(unittest.TestCase):
         budou.Chunk(u'晴れ', u'NOUN', u'ROOT', False),
         budou.Chunk(u'。', u'PUNCT', u'P', False),
     ]
-    result = self.parser._get_source_chunks(DEFAULT_SENTENCE)
+    result = self.parser._get_source_chunks(DEFAULT_SENTENCE_JA)
     self.assertEqual(
         expected, result,
         'Input sentence should be processed into source chunks.')
@@ -232,7 +243,7 @@ class TestBudouMethods(unittest.TestCase):
     expected_html_code = (u'<span class="ww">今日は</span>'
                           u'<span class="ww">晴れ。</span>')
 
-    result = self.parser.parse(DEFAULT_SENTENCE, use_cache=True)
+    result = self.parser.parse(DEFAULT_SENTENCE_JA, use_cache=True)
 
     self.assertIn(
         'chunks', result,
@@ -306,6 +317,18 @@ class TestBudouMethods(unittest.TestCase):
         }, 'When attributes is a dictionary with class property and classname '
         'is provided, the output should use the class property in attributes '
         'over classname.')
+
+  def test_get_chunks_per_space(self):
+    source = 'a b'
+    expected = [
+        budou.Chunk('a', None, None, True),
+        budou.Chunk(' ', budou.SPACE_POS, budou.SPACE_POS, True),
+        budou.Chunk('b', None, None, True)]
+    result = self.parser._get_chunks_per_space(source)
+    self.assertEqual(
+        result, expected,
+        'Input text should be parsed into chunks separated by spaces.')
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -118,10 +118,10 @@ class Budou(object):
     source = self._preprocess(source)
     dom = html.fragment_fromstring(source, create_parent='body')
     input_text = dom.text_content()
-    chunks = self._get_source_chunks(input_text, language)
-    chunks = self._concatenate_punctuations(chunks)
-    chunks = self._concatenate_by_label(chunks, True)
-    chunks = self._concatenate_by_label(chunks, False)
+    if language == 'ko':
+      chunks = self._get_chunks_per_space(input_text)
+    else:
+      chunks = self._get_chunks_with_api(input_text, language)
     chunks = self._migrate_html(chunks, dom)
     attributes = self._get_attribute_dict(attributes, classname)
     html_code = self._spanize(chunks, attributes)
@@ -132,6 +132,37 @@ class Budou(object):
     if use_cache:
       cache.set(source, language, result_value)
     return result_value
+
+  def _get_chunks_per_space(self, input_text):
+    """Returns a list of chunks by separating words by spaces.
+
+    Args:
+      input_text: String to parse.
+
+    Returns:
+      A list of Chunks.
+    """
+    chunks = []
+    for word in input_text.split():
+      chunks.append(Chunk(word, None, None, True))
+      chunks.append(Chunk(u' ', SPACE_POS, SPACE_POS, True))
+    return chunks[:-1]
+
+  def _get_chunks_with_api(self, input_text, language):
+    """Returns a list of chunks by using Natural Language API.
+
+    Args:
+      input_text: String to parse.
+      language: A language used to parse text (string, optional).
+
+    Returns:
+      A list of Chunks.
+    """
+    chunks = self._get_source_chunks(input_text, language)
+    chunks = self._concatenate_punctuations(chunks)
+    chunks = self._concatenate_by_label(chunks, True)
+    chunks = self._concatenate_by_label(chunks, False)
+    return chunks
 
   def _get_attribute_dict(self, attributes, classname=None):
     """Returns a dictionary of attribute name-value pairs.
