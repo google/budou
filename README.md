@@ -33,10 +33,10 @@ import budou
 parser = budou.authenticate('/path/to/credentials.json')
 result = parser.parse(u'今日も元気です', {'class': 'wordwrap'}, language='ja')
 
-print result['html_code']     # => "<span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>"
+print result['html_code']  # => "<span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>"
 
-print result['chunks'][0]     # => "Chunk(word='今日も', pos='NOUN', label='NN', forward=True)"
-print result['chunks'][1]     # => "Chunk(word='元気です', pos='NOUN', label='ROOT', forward=False)]"
+print result['chunks'][0]  # => "Chunk(word='今日も', pos='NOUN', label='NN', forward=True)"
+print result['chunks'][1]  # => "Chunk(word='元気です', pos='NOUN', label='ROOT', forward=False)]"
 ```
 
 ### Korean
@@ -45,16 +45,16 @@ Korean is processed by separating words by spaces, so no credential file is need
 ```python
 import budou
 parser = budou.authenticate()
-result = parser.parse(u'오늘은 양지 바르다', {'class': 'wordwrap'}, language='ko')
+result = parser.parse(u'오늘은 날씨가 좋습니다.', {'class': 'wordwrap'}, language='ko')
 
-print result['html_code']     # => "<span class="wordwrap">오늘은</span> <span class="wordwrap">양지</span> <span class="wordwrap">바르다</span>"
+print result['html_code']  # => "<span class="wordwrap">오늘은</span> <span class="wordwrap">날씨가</span> <span class="wordwrap">좋습니다.</span>"
 ```
 
 Semantic units in the output HTML will not be split at the end of line by conditioning each `SPAN` tag with `display: inline-block` in CSS.
 
 ```html
 <span class="wordwrap">今日も</span><span class="wordwrap">元気です</span>
-<span class="wordwrap">오늘은</span> <span class="wordwrap">양지</span> <span class="wordwrap">바르다</span>
+<span class="wordwrap">오늘은</span> <span class="wordwrap">날씨가</span> <span class="wordwrap">좋습니다.</span>
 ```
 
 ```css
