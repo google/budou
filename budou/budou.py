@@ -16,14 +16,13 @@
 
 """Budou, an automatic CJK line break organizer."""
 
+from . import cachefactory
+import collections
 from googleapiclient import discovery
+import httplib2
 from lxml import etree
 from lxml import html
 from oauth2client.client import GoogleCredentials
-from . import cachefactory
-import collections
-import hashlib
-import httplib2
 import oauth2client.service_account
 import re
 import six
@@ -159,9 +158,10 @@ class Budou(object):
       A list of Chunks.
     """
     chunks = self._get_source_chunks(input_text, language)
-    chunks = self._concatenate_punctuations(chunks)
-    chunks = self._concatenate_by_label(chunks, True)
-    chunks = self._concatenate_by_label(chunks, False)
+    for forward in (True, False):
+      condition = lambda chunk: (
+          chunk.label in TARGET_LABEL or chunk.pos == 'PUNCT')
+      chunks = self._concatenate_inner(chunks, condition, forward)
     return chunks
 
   def _get_attribute_dict(self, attributes, classname=None):
@@ -244,6 +244,7 @@ class Budou(object):
         sentence_length = begin_offset
       chunks.append(Chunk(
           word, pos, label,
+          # Determining the direction based on syntax dependency.
           tokens.index(token) < token['dependencyEdge']['headTokenIndex']))
       sentence_length += len(word)
     return chunks
@@ -332,38 +333,12 @@ class Budou(object):
         result.append('<span %s>%s</span>' % (attribute_str, chunk.word))
     return ''.join(result)
 
-  def _concatenate_punctuations(self, chunks):
-    """Concatenates chunks backword if they are punctuation marks.
-
-    Args:
-      chunks: The list of word chunks.
-
-    Returns:
-      The processed word chunks.
-    """
-    result = []
-    tmp_bucket = []
-    chunks = chunks[::-1]
-    for chunk in chunks:
-      if chunk.pos == u'PUNCT':
-        tmp_bucket.append(chunk)
-        continue
-      if tmp_bucket:
-        tmp_bucket.append(chunk)
-        new_word = ''.join([tmp_chunk.word for tmp_chunk in tmp_bucket[::-1]])
-        result.append(Chunk(new_word, chunk.pos, chunk.label, chunk.forward))
-        tmp_bucket = []
-      else:
-        result.append(chunk)
-    if tmp_bucket: result += tmp_bucket
-    result = result[::-1]
-    return result
-
-  def _concatenate_by_label(self, chunks, forward=True):
+  def _concatenate_inner(self, chunks, condition, forward=True):
     """Concatenates chunks based on the label and direction.
 
     Args:
       chunks: The list of word chunks.
+      condition: The function to check if each chunk should be concatenated.
       forward: Concatenation direction.
 
     Returns:
@@ -373,8 +348,7 @@ class Budou(object):
     tmp_bucket = []
     if not forward: chunks = chunks[::-1]
     for chunk in chunks:
-      if ((chunk.label in TARGET_LABEL and chunk.forward == forward) or
-          (tmp_bucket and chunk.label == SPACE_POS)):
+      if condition(chunk) and chunk.forward == forward:
         tmp_bucket.append(chunk)
         continue
       tmp_bucket.append(chunk)

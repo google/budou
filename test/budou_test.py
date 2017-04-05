@@ -194,46 +194,6 @@ class TestBudouMethods(unittest.TestCase):
         result, expected,
         'The chunks should be compiled to a HTML code.')
 
-  def test_concatenate_punctuations(self):
-    chunks = [
-        budou.Chunk(u'a', None, None, None),
-        budou.Chunk(u'b', u'PUNCT', None, None),
-        budou.Chunk(u'c', None, None, None),
-    ]
-    expected_forward_concat = [
-        budou.Chunk(u'ab', None, None, None),
-        budou.Chunk(u'c', None, None, None),
-    ]
-    result = self.parser._concatenate_punctuations(chunks)
-    self.assertEqual(
-        result, expected_forward_concat,
-        'Punctuation marks should be concatenated backward.')
-
-  def test_concatenate_by_label(self):
-    chunks = [
-        budou.Chunk(u'a', None, budou.TARGET_LABEL[0], True),
-        budou.Chunk(u'b', None, budou.TARGET_LABEL[1], False),
-        budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
-    ]
-    expected_forward_concat = [
-        budou.Chunk(u'ab', None, budou.TARGET_LABEL[1], False),
-        budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
-    ]
-    result = self.parser._concatenate_by_label(chunks, True)
-    self.assertEqual(
-        result, expected_forward_concat,
-        'Forward directional chunks should be concatenated to following '
-        'chunks.')
-    expected_backward_concat = [
-        budou.Chunk(u'ab', None, budou.TARGET_LABEL[0], True),
-        budou.Chunk(u'c', None, budou.TARGET_LABEL[2], True),
-    ]
-    result = self.parser._concatenate_by_label(chunks, False)
-    self.assertEqual(
-        result, expected_backward_concat,
-        'Backward directional chunks should be concatenated to preceding '
-        'chunks.')
-
   def test_cache(self):
     expected_chunks = [
         budou.Chunk(u'今日は', u'NOUN', u'NN', True),
