@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc. All rights reserved.
+# Copyright 2017 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ import hashlib
 import six
 import shelve
 
-CACHE_SALT = '2016-10-11'
-SHELVE_CACHE_FILE_NAME = 'budou-cache.shelve'
 
 def load_cache():
   try:
@@ -32,6 +30,9 @@ def load_cache():
 
 @six.add_metaclass(ABCMeta)
 class BudouCache(object):
+
+  CACHE_SALT = '2017-04-13'
+  DEFAULT_FILE_PATH = './budou-cache.shelve'
 
   def __repr__(self):
     return '<%s>' % (self.__class__.__name__)
@@ -46,21 +47,24 @@ class BudouCache(object):
 
   def _get_cache_key(self, source, language):
     """Returns a cache key for the given source and class name."""
-    key_source = u'%s:%s:%s' % (CACHE_SALT, source, language)
+    key_source = u'%s:%s:%s' % (self.CACHE_SALT, source, language)
     return hashlib.md5(key_source.encode('utf8')).hexdigest()
 
 
 class ShelveCache(BudouCache):
 
+  def __init__(self, filepath = None):
+    self.filepath = filepath if filepath else self.DEFAULT_FILE_PATH
+
   def get(self, source, language):
-    cache_shelve = shelve.open(SHELVE_CACHE_FILE_NAME)
+    cache_shelve = shelve.open(self.filepath)
     cache_key = self._get_cache_key(source, language)
     result_value = cache_shelve.get(cache_key, None)
     cache_shelve.close()
     return result_value
 
   def set(self, source, language, value):
-    cache_shelve = shelve.open(SHELVE_CACHE_FILE_NAME)
+    cache_shelve = shelve.open(self.filepath)
     cache_key = self._get_cache_key(source, language)
     cache_shelve[cache_key] = value
     cache_shelve.close()

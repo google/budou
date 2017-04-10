@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2016 Google Inc. All rights reserved.
+# Copyright 2017 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class TestGAECacheFactory(unittest.TestCase):
     del self.cache
 
   def test_load(self):
-    self.assertEqual(repr(self.cache), '<AppEngineCache>',
+    self.assertEqual('<AppEngineCache>', repr(self.cache),
         'Under GAE environment, AppEngineCache should be loaded.')
 
   def test_set_and_get(self):
@@ -43,7 +43,7 @@ class TestGAECacheFactory(unittest.TestCase):
     language = 'a'
     target = 'banana'
     self.cache.set(source, language, target)
-    self.assertEqual(self.cache.get(source, language), target,
+    self.assertEqual(target, self.cache.get(source, language),
         'The target should be cached.')
 
   def test_cache_key(self):
