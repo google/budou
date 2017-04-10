@@ -289,6 +289,36 @@ class TestBudouMethods(unittest.TestCase):
         result, expected,
         'Input text should be parsed into chunks separated by spaces.')
 
+  def test_update_punct_direction(self):
+    chunks = [
+        budou.Chunk(u'。', u'PUNCT', None, None),
+        budou.Chunk(u'、', u'PUNCT', None, None),
+        budou.Chunk(u'「', u'PUNCT', None, None),
+        budou.Chunk(u'」', u'PUNCT', None, None),
+        budou.Chunk(u'（', u'PUNCT', None, None),
+        budou.Chunk(u'）', u'PUNCT', None, None),
+        budou.Chunk(u'[', u'PUNCT', None, None),
+        budou.Chunk(u']', u'PUNCT', None, None),
+        budou.Chunk(u'(', u'PUNCT', None, None),
+        budou.Chunk(u')', u'PUNCT', None, None),
+    ]
+    expected = [
+        budou.Chunk(u'。', u'PUNCT', None, False),
+        budou.Chunk(u'、', u'PUNCT', None, False),
+        budou.Chunk(u'「', u'PUNCT', None, True),
+        budou.Chunk(u'」', u'PUNCT', None, False),
+        budou.Chunk(u'（', u'PUNCT', None, True),
+        budou.Chunk(u'）', u'PUNCT', None, False),
+        budou.Chunk(u'[', u'PUNCT', None, True),
+        budou.Chunk(u']', u'PUNCT', None, False),
+        budou.Chunk(u'(', u'PUNCT', None, True),
+        budou.Chunk(u')', u'PUNCT', None, False),
+    ]
+    result = self.parser._update_punct_direction(chunks)
+    self.assertEqual(
+        result, expected,
+        'Punctuation mark\'s concatenating direction should be determined.')
+
 
 if __name__ == '__main__':
   unittest.main()
