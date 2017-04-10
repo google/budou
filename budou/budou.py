@@ -26,6 +26,7 @@ from oauth2client.client import GoogleCredentials
 import oauth2client.service_account
 import re
 import six
+import unicodedata
 
 Chunk = collections.namedtuple('Chunk', ['word', 'pos', 'label', 'forward'])
 """Word chunk object.
@@ -158,11 +159,41 @@ class Budou(object):
       A list of Chunks.
     """
     chunks = self._get_source_chunks(input_text, language)
+    chunks = self._update_punct_direction(chunks)
     for forward in (True, False):
       condition = lambda chunk: (
           chunk.label in TARGET_LABEL or chunk.pos == 'PUNCT')
       chunks = self._concatenate_inner(chunks, condition, forward)
     return chunks
+
+  def _update_punct_direction(self, chunks):
+    """Updates chunk's concatenate direction if it is a punctuation mark.
+
+    Args:
+      chunks: A list of Chunks.
+
+    Returns:
+      A list of updated Chunks.
+    """
+    result = []
+    for chunk in chunks:
+      if chunk.pos == 'PUNCT':
+        forward = False
+        try:
+          # Getting unicode category to determine the direction.
+          # Concatenates to the following if it belongs to Ps or Pi category.
+          # Ps: Punctuation, open (e.g. opening bracket characters)
+          # Pi: Punctuation, initial quote (e.g. opening quotation mark)
+          # Otherwise, concatenates to the previous word.
+          # See also https://en.wikipedia.org/wiki/Unicode_character_property
+          category = unicodedata.category(chunk.word)
+          if category in ('Ps', 'Pi'):
+            forward = True
+        except:
+          pass
+        chunk = Chunk(chunk.word, chunk.pos, chunk.label, forward)
+      result.append(chunk)
+    return result
 
   def _get_attribute_dict(self, attributes, classname=None):
     """Returns a dictionary of attribute name-value pairs.
