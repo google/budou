@@ -150,7 +150,7 @@ result = parser.parse(input_text, {'aria-describedby': element_id}, language='ja
 `parser.parse()` method accepts options below in addition to the input text.
 
 | Option | Type | Default | Description |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | attributes | dictionary | `{'class': 'ww'}` | A key-value mapping for attributes of output SPAN tags. |
 | use_cache | boolean | `True` | Whether to use caching. |
 | language | str | `None` | Language of the text. If None is provided, NL API tries to detect from the input text. |
