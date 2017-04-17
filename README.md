@@ -2,12 +2,13 @@
 [![PyPI version](https://badge.fury.io/py/budou.svg)](http://badge.fury.io/py/budou)
 [![Build Status](https://travis-ci.org/google/budou.svg?branch=master)](https://travis-ci.org/google/budou)
 
-Budou is an automatic line breaking tool for beautiful headings in CJK (Chinese,
-Japanese, and Korean).
+English uses spacing and hyphenation as cues to allow for beautiful and legible line breaks.
+Certain CJK languages have none of these, and are notoriously more difficult.
+Breaks occur randomly, usually in the middle of a word.
+This is a long standing issue in typography on web, and results in degradation of readability.
 
-Budou automatically translates CJK sentences into organized HTML code with
-meaningful chunks wrapped in non-breaking markup so as to semantically control
-line breaks.
+Budou automatically translates CJK sentences into organized HTML code
+with lexical chunks wrapped in non-breaking markup so as to semantically control line breaks.
 Budou uses [Google Cloud Natural Language API](https://cloud.google.com/natural-language/)
 (NL API) to analyze the input sentence, and it concatenates proper words in
 order to produce meaningful chunks utilizing part-of-speech (pos) tagging and
@@ -22,7 +23,7 @@ Install the library by running ` pip install budou`.
 Also, a credential json file is needed for authorization to NL API.
 
 ## How to use
-### Japanse
+### Japanese
 Get the parser by completing authentication with a credential file for NL API,
 which can be downloaded from [Google Cloud Platform](https://cloud.google.com)
 by navigating through "API Manager" > "Credentials" > "Create credentials" >
@@ -75,9 +76,8 @@ Support for other Asian languages with line break issues, such as Chinese and
 Thai, will be added as Cloud Natural Language API adds support.
 
 ## Where to use
-Budou is designed to be used in eye-catching sentences such as titles and
-headings, but **NOT** body texts assuming split chunks would be more stood out
-negatively in larger typography.
+Budou is designed to be used mostly in eye-catching sentences such as titles and
+headings assuming split chunks would be more stood out negatively in larger typography.
 
 
 ## Caching
@@ -85,7 +85,7 @@ Budou supports caching by default in order to save unnecessary requests to NL
 API and make the processing faster. If you want to force refresh the cache,
 put `use_cache=False`.
 
-In a standard environment, Budou will make a cache file in your file system with
+In a standard environment, Budou will create a cache file with
 [python shelve](https://docs.python.org/3/library/shelve.html) format.
 
 In [Google App Engine Python Standard Environment](https://cloud.google.com/appengine/docs/standard/python/),
@@ -100,7 +100,7 @@ Entity Analysis will improve the accuracy of parsing for some phrases,
 especially proper nouns, so it is recommended to use if your target sentences
 include a name of an individual person, place, organization etc.
 Please note that Entity Analysis will results in additional pricing because it
-requires additional requests to NL API. For more detail of API pricing, please
+requires additional requests to NL API. For more detail about API pricing, please
 refer to [Pricing | Google Cloud Natural Language API Documentation](https://cloud.google.com/natural-language/pricing).
 
 ```python
@@ -158,7 +158,7 @@ result = parser.parse(input_text, {'aria-describedby': element_id}, language='ja
 
 
 ## Pricing
-Budou is backed up by Google Natural Language API, so cost may be incurred by
+Budou is backed up by Google Natural Language API, so cost may be incurred when
 using that API.
 
 Processing Korean sentences does not need authentication, so no fee will be
