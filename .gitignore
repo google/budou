@@ -6,3 +6,4 @@ dist/
 budou.egg-info/
 .eggs/
 *.db
+budou-cache.shelve

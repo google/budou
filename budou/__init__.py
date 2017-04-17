@@ -16,23 +16,13 @@
 """Package indicator for budou."""
 from .budou import Budou
 from .budou import Chunk
+from .budou import ChunkQueue
 from .budou import Element
-from .budou import SPACE_POS
-from .budou import HTML_POS
-from .budou import TARGET_LABEL
-from .budou import DEFAULT_CLASS_NAME
 from .cachefactory import load_cache
-from .cachefactory import CACHE_SALT
-from .cachefactory import SHELVE_CACHE_FILE_NAME
 
 authenticate = Budou.authenticate
 Chunk = Chunk
+ChunkQueue = ChunkQueue
 Element = Element
-SPACE_POS = SPACE_POS
-HTML_POS = HTML_POS
-TARGET_LABEL = TARGET_LABEL
-DEFAULT_CLASS_NAME = DEFAULT_CLASS_NAME
 
 load_cache = load_cache
-CACHE_SALT=CACHE_SALT
-SHELVE_CACHE_FILE_NAME=SHELVE_CACHE_FILE_NAME

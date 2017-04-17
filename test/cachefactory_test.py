@@ -24,21 +24,21 @@ class TestStandardCacheFactory(unittest.TestCase):
     self.cache = budou.load_cache()
 
   def tearDown(self):
-    if os.path.isfile(budou.SHELVE_CACHE_FILE_NAME):
-      os.remove(budou.SHELVE_CACHE_FILE_NAME)
-    del self.cache
+    if os.path.isfile(self.cache.DEFAULT_FILE_PATH):
+      os.remove(self.cache.DEFAULT_FILE_PATH)
+    self.cache = None
 
   def test_load(self):
     cache_type = repr(self.cache)
-    self.assertEqual(cache_type, '<ShelveCache>',
-        'Under non GAE environment, ShelveCache should be loaded.')
+    self.assertEqual('<ShelveCache>', cache_type,
+        'ShelveCache should be loaded under standard environment.')
 
   def test_set_and_get(self):
     source = 'apple'
     language = 'a'
     target = 'banana'
     self.cache.set(source, language, target)
-    self.assertTrue(os.path.isfile(budou.SHELVE_CACHE_FILE_NAME),
+    self.assertTrue(os.path.isfile(self.cache.DEFAULT_FILE_PATH),
         'Cache file should be generated.')
     self.assertEqual(self.cache.get(source, language), target,
         'The target should be cached.')
