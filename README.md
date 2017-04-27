@@ -23,7 +23,6 @@ Install the library by running ` pip install budou`.
 Also, a credential json file is needed for authorization to NL API.
 
 ## How to use
-### Japanese
 Get the parser by completing authentication with a credential file for NL API,
 which can be downloaded from [Google Cloud Platform](https://cloud.google.com)
 by navigating through "API Manager" > "Credentials" > "Create credentials" >
@@ -41,19 +40,6 @@ print(result['chunks'][0]['word'])  # => "今日も"
 print(result['chunks'][1]['word'])  # => "元気です"
 ```
 
-### Korean
-Korean is processed by separating words by spaces, so no credential file is
-needed.
-
-```python
-import budou
-parser = budou.authenticate()
-result = parser.parse(u'오늘은 날씨가 좋습니다.', attributes={'class': 'wordwrap'}, language='ko')
-
-print(result['html_code'])  # => "<span class="wordwrap">오늘은</span> <span class="wordwrap">날씨가</span> <span class="wordwrap">좋습니다.</span>"
-```
-
-### CSS setup
 Semantic units in the output HTML will not be split at the end of line by
 conditioning each `SPAN` tag with `display: inline-block` in CSS.
 
@@ -70,10 +56,14 @@ conditioning each `SPAN` tag with `display: inline-block` in CSS.
 
 ## Supported Language
 - Japanese
-- Korean
 
 Support for other Asian languages with line break issues, such as Chinese and
 Thai, will be added as Cloud Natural Language API adds support.
+
+### Korean support?
+Korean has spaces between chunks, so you can organize line breaking simply by
+putting `word-break: keep-all` in your CSS. No need for Budou :)
+
 
 ## Where to use
 Budou is designed to be used mostly in eye-catching sentences such as titles and
@@ -160,9 +150,6 @@ result = parser.parse(input_text, {'aria-describedby': element_id}, language='ja
 ## Pricing
 Budou is backed up by Google Natural Language API, so cost may be incurred when
 using that API.
-
-Processing Korean sentences does not need authentication, so no fee will be
-incurred when you specify `lang='ko'`.
 
 In other languages including Japanese, the default parser uses *Syntax Analysis*
 and incurs cost according to monthly usage.
