@@ -234,7 +234,7 @@ class Budou(object):
         ['https://www.googleapis.com/auth/cloud-platform'])
     http = httplib2.Http()
     scoped_credentials.authorize(http)
-    service = discovery.build('language', 'v1beta1', http=http)
+    service = discovery.build('language', 'v1beta2', http=http)
     return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
