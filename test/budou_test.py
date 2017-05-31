@@ -22,6 +22,7 @@ import unittest
 
 DEFAULT_SENTENCE_JA = u'六本木ヒルズで、「ご飯」を食べます。'
 DEFAULT_SENTENCE_KO = u'오늘은 맑음.'
+DEFAULT_SENTENCE_ZH = u'随时互动交流并掌握最新上海动态'
 
 DEFAULT_TOKENS_JA = [{
     'dependencyEdge': {'headTokenIndex': 1, 'label': 'NN'},
@@ -74,6 +75,43 @@ DEFAULT_ENTITIES_JA = [
   {'beginOffset': 9, 'content': u'ご飯'}
 ]
 
+DEFAULT_TOKENS_ZH = [{
+    'dependencyEdge': {'headTokenIndex': 4, 'label': 'VMOD'},
+    'partOfSpeech': {'tag': 'UNKNOWN'},
+    'text': {'beginOffset': 0, 'content': u'随时'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 2, 'label': 'NN'},
+    'partOfSpeech': {'tag': 'UNKNOWN'},
+    'text': {'beginOffset': 2, 'content': u'互动'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 0, 'label': 'DOBJ'},
+    'partOfSpeech': {'tag': 'NOUN'},
+    'text': {'beginOffset': 4, 'content': u'交流'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 4, 'label': 'MARK'},
+    'partOfSpeech': {'tag': 'ADV'},
+    'text': {'beginOffset': 6, 'content': u'并'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 4, 'label': 'ROOT'},
+    'partOfSpeech': {'tag': 'VERB'},
+    'text': {'beginOffset': 7, 'content': u'掌握'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 7, 'label': 'AMOD'},
+    'partOfSpeech': {'tag': 'ADJ'},
+    'text': {'beginOffset': 9, 'content': u'最新'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 7, 'label': 'NN'},
+    'partOfSpeech': {'tag': 'NOUN'},
+    'text': {'beginOffset': 11, 'content': u'上海'}
+  }, {
+    'dependencyEdge': {'headTokenIndex': 4, 'label': 'DOBJ'},
+    'partOfSpeech': {'tag': 'NOUN'},
+    'text': {'beginOffset': 13, 'content': u'动态'}
+  }]
+
+DEFAULT_ENTITIES_ZH = [
+  {'beginOffset': 11, 'content': u'上海动态'}
+]
 
 class TestChunkMethods(unittest.TestCase):
 
@@ -216,6 +254,23 @@ class TestBudouMethods(unittest.TestCase):
     result = self.parser.parse(
         source, language='ko', use_cache=False)
     expected = [u'오늘은', u' ', u'맑음.']
+    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
+
+  def test_parse_zh(self):
+    # Mocks external API request.
+    budou.api.get_annotations = MagicMock(
+    return_value=DEFAULT_TOKENS_ZH)
+    budou.api.get_entities = MagicMock(
+            return_value=DEFAULT_ENTITIES_ZH)
+    source = DEFAULT_SENTENCE_ZH
+    result = self.parser.parse(
+    source, language='zh', use_cache=False)
+    expected = [u'随时', u'互动', u'交流', u'并', u'掌握', u'最新', u'上海', u'动态']
+    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
+
+    result = self.parser.parse(
+        source, language='zh', use_cache=False, use_entity=True)
+    expected = [u'随时', u'互动', u'交流', u'并', u'掌握', u'最新', u'上海动态']
     self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
 
   def test_get_chunks_per_space(self):
