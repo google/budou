@@ -223,9 +223,9 @@ class TestBudouMethods(unittest.TestCase):
     self.parser = budou.Budou(None)
     # Mocks external API request.
     budou.api.get_annotations = MagicMock(
-      return_value=DEFAULT_TOKENS_JA)
+        return_value=DEFAULT_TOKENS_JA)
     budou.api.get_entities = MagicMock(
-          return_value=DEFAULT_ENTITIES_JA)
+        return_value=DEFAULT_ENTITIES_JA)
 
   def tearDown(self):
     self.parser = None
