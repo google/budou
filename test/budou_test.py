@@ -17,101 +17,10 @@
 from lxml import html
 from mock import MagicMock
 import budou
+import json
 import os
 import unittest
 
-DEFAULT_SENTENCE_JA = u'六本木ヒルズで、「ご飯」を食べます。'
-DEFAULT_SENTENCE_KO = u'오늘은 맑음.'
-DEFAULT_SENTENCE_ZH = u'随时互动交流并掌握最新上海动态'
-
-DEFAULT_TOKENS_JA = [{
-    'dependencyEdge': {'headTokenIndex': 1, 'label': 'NN'},
-    'partOfSpeech': {'tag': 'NOUN'},
-    'text': {'beginOffset': 0, 'content': u'六本木'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 8, 'label': 'ADVPHMOD'},
-    'partOfSpeech': {'tag': 'NOUN'},
-    'text': {'beginOffset': 3, 'content': u'ヒルズ'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 1, 'label': 'PRT'},
-    'partOfSpeech': {'tag': 'PRT'},
-    'text': {'beginOffset': 6, 'content': u'で'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 8, 'label': 'P'},
-    'partOfSpeech': {'tag': 'PUNCT'},
-    'text': {'beginOffset': 7, 'content': u'、'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 5, 'label': 'P'},
-    'partOfSpeech': {'tag': 'PUNCT'},
-    'text': {'beginOffset': 8, 'content': u'「'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 8, 'label': 'DOBJ'},
-    'partOfSpeech': {'tag': 'NOUN'},
-    'text': {'beginOffset': 9, 'content': u'ご飯'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 5, 'label': 'P'},
-    'partOfSpeech': {'tag': 'PUNCT'},
-    'text': {'beginOffset': 11, 'content': u'」'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 5, 'label': 'PRT'},
-    'partOfSpeech': {'tag': 'PRT'},
-    'text': {'beginOffset': 12, 'content': u'を'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 8, 'label': 'ROOT'},
-    'partOfSpeech': {'tag': 'VERB'},
-    'text': {'beginOffset': 13, 'content': u'食べ'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 8, 'label': 'AUX'},
-    'partOfSpeech': {'tag': 'VERB'},
-    'text': {'beginOffset': 15, 'content': u'ます'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 8, 'label': 'P'},
-    'partOfSpeech': {'tag': 'PUNCT'},
-    'text': {'beginOffset': 17, 'content': u'。'}
-}]
-
-DEFAULT_ENTITIES_JA = [
-  {'beginOffset': 0, 'content': u'六本木ヒルズ'},
-  {'beginOffset': 9, 'content': u'ご飯'}
-]
-
-DEFAULT_TOKENS_ZH = [{
-    'dependencyEdge': {'headTokenIndex': 4, 'label': 'VMOD'},
-    'partOfSpeech': {'tag': 'UNKNOWN'},
-    'text': {'beginOffset': 0, 'content': u'随时'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 2, 'label': 'NN'},
-    'partOfSpeech': {'tag': 'UNKNOWN'},
-    'text': {'beginOffset': 2, 'content': u'互动'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 0, 'label': 'DOBJ'},
-    'partOfSpeech': {'tag': 'NOUN'},
-    'text': {'beginOffset': 4, 'content': u'交流'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 4, 'label': 'MARK'},
-    'partOfSpeech': {'tag': 'ADV'},
-    'text': {'beginOffset': 6, 'content': u'并'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 4, 'label': 'ROOT'},
-    'partOfSpeech': {'tag': 'VERB'},
-    'text': {'beginOffset': 7, 'content': u'掌握'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 7, 'label': 'AMOD'},
-    'partOfSpeech': {'tag': 'ADJ'},
-    'text': {'beginOffset': 9, 'content': u'最新'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 7, 'label': 'NN'},
-    'partOfSpeech': {'tag': 'NOUN'},
-    'text': {'beginOffset': 11, 'content': u'上海'}
-  }, {
-    'dependencyEdge': {'headTokenIndex': 4, 'label': 'DOBJ'},
-    'partOfSpeech': {'tag': 'NOUN'},
-    'text': {'beginOffset': 13, 'content': u'动态'}
-  }]
-
-DEFAULT_ENTITIES_ZH = [
-  {'beginOffset': 11, 'content': u'上海动态'}
-]
 
 class TestChunkMethods(unittest.TestCase):
 
@@ -221,11 +130,10 @@ class TestBudouMethods(unittest.TestCase):
 
   def setUp(self):
     self.parser = budou.Budou(None)
-    # Mocks external API request.
-    budou.api.get_annotations = MagicMock(
-        return_value=DEFAULT_TOKENS_JA)
-    budou.api.get_entities = MagicMock(
-        return_value=DEFAULT_ENTITIES_JA)
+    cases_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), 'cases.json')
+    with open(cases_path) as f:
+      self.cases = json.load(f)
 
   def tearDown(self):
     self.parser = None
@@ -237,41 +145,21 @@ class TestBudouMethods(unittest.TestCase):
       queue.add(chunk)
     return queue
 
-  def test_parse_ja(self):
-    source = DEFAULT_SENTENCE_JA
-    result = self.parser.parse(
-        source, language='ja', use_cache=False, use_entity=False)
-    expected = [u'六本木', u'ヒルズで、', u'「ご飯」を', u'食べます。']
-    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
+  def test_parse(self):
+    for case in self.cases.values():
+      # Mocks external API request.
+      budou.api.get_annotations = MagicMock(return_value=case['tokens'])
+      budou.api.get_entities = MagicMock(return_value=case['entities'])
+      source = case['sentence']
+      result = self.parser.parse(
+          source, language=case['language'], use_cache=False, use_entity=False)
+      expected = case['expected']
+      self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
 
-    result = self.parser.parse(
-        source, language='ja', use_cache=False, use_entity=True)
-    expected = [u'六本木ヒルズで、', u'「ご飯」を', u'食べます。']
-    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
-
-  def test_parse_ko(self):
-    source = DEFAULT_SENTENCE_KO
-    result = self.parser.parse(
-        source, language='ko', use_cache=False)
-    expected = [u'오늘은', u' ', u'맑음.']
-    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
-
-  def test_parse_zh(self):
-    # Mocks external API request.
-    budou.api.get_annotations = MagicMock(
-    return_value=DEFAULT_TOKENS_ZH)
-    budou.api.get_entities = MagicMock(
-            return_value=DEFAULT_ENTITIES_ZH)
-    source = DEFAULT_SENTENCE_ZH
-    result = self.parser.parse(
-    source, language='zh', use_cache=False)
-    expected = [u'随时', u'互动', u'交流', u'并', u'掌握', u'最新', u'上海', u'动态']
-    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
-
-    result = self.parser.parse(
-        source, language='zh', use_cache=False, use_entity=True)
-    expected = [u'随时', u'互动', u'交流', u'并', u'掌握', u'最新', u'上海动态']
-    self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
+      result = self.parser.parse(
+          source, language=case['language'], use_cache=False, use_entity=True)
+      expected = case['expected_with_entity']
+      self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
 
   def test_get_chunks_per_space(self):
     source = 'a b'
@@ -350,7 +238,9 @@ class TestBudouMethods(unittest.TestCase):
         'BR tags, line breaks, and unnecessary spaces should be removed.')
 
   def test_get_source_chunks(self):
-    queue = self.parser._get_source_chunks(DEFAULT_SENTENCE_JA)
+    budou.api.get_annotations = MagicMock(
+        return_value=self.cases['ja-case1']['tokens'])
+    queue = self.parser._get_source_chunks(self.cases['ja-case1']['sentence'])
     expected = [
         budou.Chunk(u'六本木', label='NN', pos='NOUN', dependency=None),
         budou.Chunk(u'ヒルズ', label='ADVPHMOD', pos='NOUN', dependency=None),

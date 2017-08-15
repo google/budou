@@ -153,7 +153,12 @@ class ChunkQueue(object):
     tmp_bucket = []
     chunks = self.chunks if direction else self.chunks[::-1]
     for chunk in chunks:
-      if chunk.dependency == direction:
+      if (
+            # if the chunk has matched dependency, do concatenation.
+            chunk.dependency == direction or
+            # if the chunk is SPACE, concatenate to the previous chunk.
+            (direction == False and chunk.is_space())
+        ):
         tmp_bucket.append(chunk)
         continue
       tmp_bucket.append(chunk)
