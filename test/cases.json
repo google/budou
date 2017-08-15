@@ -95,5 +95,33 @@
     ],
     "expected": ["随时", "互动", "交流", "并", "掌握", "最新", "上海", "动态"],
     "expected_with_entity": ["随时", "互动", "交流", "并", "掌握", "最新", "上海动态"]
+  },
+  "ja-case2": {
+    "sentence": "これは Android です。",
+    "language": "ja",
+    "tokens": [{
+      "text": {"beginOffset": 0, "content": "これ"},
+      "partOfSpeech": {"tag": "PRON"},
+      "dependencyEdge": {"headTokenIndex": 2, "label": "NSUBJ"}
+    }, {
+      "text": {"beginOffset": 2, "content": "は"},
+      "partOfSpeech": {"tag": "PRT"},
+      "dependencyEdge": {"headTokenIndex": 0, "label": "PRT"}
+    }, {
+      "text": {"beginOffset": 4, "content": "Android"},
+      "partOfSpeech": {"tag": "NOUN"},
+      "dependencyEdge": {"headTokenIndex": 2, "label": "ROOT"}
+    }, {
+      "text": {"beginOffset": 12, "content": "です"},
+      "partOfSpeech": {"tag": "VERB"},
+      "dependencyEdge": {"headTokenIndex": 2, "label": "AUX"}
+    }, {
+      "text": {"beginOffset": 14, "content": "。"},
+      "partOfSpeech": {"tag": "PUNCT"},
+      "dependencyEdge": {"headTokenIndex": 2, "label": "P"}
+    }],
+    "entities": [],
+    "expected": ["これは ", "Android です。"],
+    "expected_with_entity": ["これは ", "Android です。"]
   }
 }
