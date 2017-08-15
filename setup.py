@@ -16,7 +16,7 @@ from setuptools import setup
 
 setup(
     name='budou',
-    version='0.3.1',
+    version='0.3.2',
     author='Shuhei Iitsuka',
     author_email='tushuhei@google.com',
     description='CJK Line Break Organizer',
