@@ -12,28 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from setuptools import setup
+
+def read_file(name):
+  with open(os.path.join(os.path.dirname(__file__), name), 'r') as f:
+    return f.read().strip()
 
 setup(
     name='budou',
-    version='0.3.2',
+    version='0.4.0',
     author='Shuhei Iitsuka',
     author_email='tushuhei@google.com',
     description='CJK Line Break Organizer',
     license='Apache',
     url='https://github.com/google/budou/',
     packages=['budou'],
-    install_requires=[
-        'google-api-python-client',
-        'oauth2client',
-        'lxml>=3.6.1',
-        'six',
-    ],
+    install_requires=read_file('requirements.txt').splitlines(),
+    tests_require=read_file('requirements_dev.txt').splitlines(),
     scripts=[
         'budou/budou.py',
-    ],
-    tests_require=[
-        'mock',
     ],
     test_suite='test',
     classifiers=[
