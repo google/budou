@@ -1,0 +1,6 @@
+google-api-python-client
+oauth2client
+lxml>=3.6.1
+urllib3
+google-auth>=1.0.0
+google-auth-httplib2

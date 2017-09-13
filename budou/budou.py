@@ -16,14 +16,14 @@
 
 """Budou, an automatic CJK line break organizer."""
 
+from __future__ import print_function
 from . import api, cachefactory
 import collections
 from googleapiclient import discovery
 import httplib2
 from lxml import etree
 from lxml import html
-from oauth2client.client import GoogleCredentials
-import oauth2client.service_account
+import google.auth
 import re
 import six
 import unicodedata
@@ -230,16 +230,21 @@ class Budou(object):
       Budou parser. (Budou)
     """
     if json_path:
-      credentials = (
-          oauth2client.service_account.ServiceAccountCredentials
-          .from_json_keyfile_name(json_path))
+      try:
+        from google.oauth2 import service_account
+        credentials = service_account.Credentials.from_service_account_file(
+            json_path)
+      except ImportError:
+        print('Failed to load google.oauth2.service_account module.',
+              'If you are running this script in Google App Engine',
+              'environemnt, please call `authenticate` method with empty',
+              'argument, which will result in caching results with memcache.')
     else:
-      credentials = GoogleCredentials.get_application_default()
-    scoped_credentials = credentials.create_scoped(
+      credentials, project = google.auth.default()
+    scoped_credentials = credentials.with_scopes(
         ['https://www.googleapis.com/auth/cloud-platform'])
-    http = httplib2.Http()
-    scoped_credentials.authorize(http)
-    service = discovery.build('language', 'v1beta2', http=http)
+    service = discovery.build(
+        'language', 'v1beta2', credentials=scoped_credentials)
     return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
