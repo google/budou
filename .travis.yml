@@ -28,9 +28,6 @@ script:
     curl https://sdk.cloud.google.com | bash;
   fi
 - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-    pip install --upgrade google-api-python-client;
-    pip install lxml;
-    pip install google-auth;
-    pip install urllib3;
+    pip install -t lib -r requirements.txt;
     python gae_test_runner.py ${GAE_PYTHONPATH} --test-path=test_gae;
   fi
