@@ -16,6 +16,9 @@
 
 from google.appengine.api import memcache
 from google.appengine.ext import testbed
+from google.appengine.ext import vendor
+vendor.add("lib")
+from google.cloud import language as nlp
 import budou
 import unittest
 

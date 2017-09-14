@@ -129,7 +129,7 @@ class TestChunkQueueMethods(unittest.TestCase):
 class TestBudouMethods(unittest.TestCase):
 
   def setUp(self):
-    self.parser = budou.Budou(None)
+    self.parser = budou.Budou()
     cases_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), 'cases.json')
     with open(cases_path) as f:
@@ -148,8 +148,8 @@ class TestBudouMethods(unittest.TestCase):
   def test_parse(self):
     for case in self.cases.values():
       # Mocks external API request.
-      budou.api.get_annotations = MagicMock(return_value=case['tokens'])
-      budou.api.get_entities = MagicMock(return_value=case['entities'])
+      self.parser.get_annotations = MagicMock(return_value=case['tokens'])
+      self.parser.get_entities = MagicMock(return_value=case['entities'])
       source = case['sentence']
       result = self.parser.parse(
           source, language=case['language'], use_cache=False, use_entity=False)
@@ -238,7 +238,7 @@ class TestBudouMethods(unittest.TestCase):
         'BR tags, line breaks, and unnecessary spaces should be removed.')
 
   def test_get_source_chunks(self):
-    budou.api.get_annotations = MagicMock(
+    self.parser.get_annotations = MagicMock(
         return_value=self.cases['ja-case1']['tokens'])
     queue = self.parser._get_source_chunks(self.cases['ja-case1']['sentence'])
     expected = [
