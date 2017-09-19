@@ -1,4 +1,4 @@
-google-auth>=1.0.0
-google-cloud-language
+google-api-python-client
 lxml>=3.6.1
-oauth2client
+urllib3
+google-auth>=1.0.0
