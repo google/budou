@@ -300,7 +300,8 @@ class Budou(object):
         'chunks': [chunk.serialize() for chunk in queue.chunks],
         'html_code': html_code
     }
-    cache.set(source, language, result_value)
+    if use_cache:
+      cache.set(source, language, result_value)
     return result_value
 
   def _get_chunks_per_space(self, input_text):
