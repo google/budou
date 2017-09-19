@@ -17,15 +17,16 @@
 """Budou, an automatic CJK line break organizer."""
 
 from __future__ import print_function
-from . import cachefactory
+from . import api, cachefactory
 import collections
-import httplib2
+import google.auth
+from googleapiclient import discovery
+from google.auth.transport.urllib3 import AuthorizedHttp
 from lxml import etree
 from lxml import html
 import re
 import six
 import unicodedata
-from google.cloud import language as nlp
 
 cache = cachefactory.load_cache()
 
@@ -211,8 +212,8 @@ class Budou(object):
   """
   DEFAULT_CLASS_NAME = 'ww'
 
-  def __init__(self):
-    self.client = None
+  def __init__(self, service):
+    self.service = service
 
   @classmethod
   def authenticate(cls, json_path=None):
@@ -228,21 +229,23 @@ class Budou(object):
     Returns:
       Budou parser. (Budou)
     """
-    parser = cls()
     if json_path:
       try:
         from google.oauth2 import service_account
         credentials = service_account.Credentials.from_service_account_file(
             json_path)
-        parser.client = nlp.LanguageServiceClient(credentials=credentials)
       except ImportError:
         print('Failed to load google.oauth2.service_account module.',
               'If you are running this script in Google App Engine',
               'environemnt, please call `authenticate` method with empty',
               'argument, which will result in caching results with memcache.')
     else:
-      parser.client = nlp.LanguageServiceClient()
-    return parser
+      credentials, project = google.auth.default()
+    scoped_credentials = credentials.with_scopes(
+        ['https://www.googleapis.com/auth/cloud-platform'])
+    auth_http = AuthorizedHttp(scoped_credentials)
+    service = discovery.build('language', 'v1beta2', http=auth_http)
+    return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
             use_entity=False, classname=None):
@@ -331,7 +334,7 @@ class Budou(object):
     """
     queue = self._get_source_chunks(input_text, language)
     if use_entity:
-      entities = self.get_entities(input_text, language)
+      entities = api.get_entities(self.service, input_text, language)
       queue = self._group_chunks_by_entities(queue, entities)
     queue.resolve_dependency()
     return queue
@@ -386,7 +389,7 @@ class Budou(object):
     """
     queue = ChunkQueue()
     sentence_length = 0
-    tokens = self.get_annotations(input_text, language)
+    tokens = api.get_annotations(self.service, input_text, language)
     for i, token in enumerate(tokens):
       word = token['text']['content']
       begin_offset = token['text']['beginOffset']
@@ -487,60 +490,3 @@ class Budou(object):
             '%s="%s"' % (k, v) for k, v in sorted(attributes.items()))
         result.append('<span %s>%s</span>' % (attribute_str, chunk.word))
     return ''.join(result)
-
-  def get_annotations(self, text, language=None, encoding='UTF32'):
-    """Returns the list of annotations from the given text."""
-    document = nlp.types.Document(
-        content=text,
-        language=language,
-        type='PLAIN_TEXT'
-    )
-    response = self.client.annotate_text(
-        document=document,
-        features={'extract_syntax': True},
-        encoding_type=encoding,
-    )
-
-    result = []
-    for token in response.tokens:
-      result.append({
-          "dependencyEdge": {
-              "headTokenIndex": token.dependency_edge.head_token_index,
-              "label": token.dependency_edge.Label.Name(
-                  token.dependency_edge.label)
-          },
-          "partOfSpeech": {
-              "tag": token.part_of_speech.Tag.Name(token.part_of_speech.tag)
-          },
-          "text": {
-              "beginOffset": token.text.begin_offset,
-              "content": token.text.content
-          }
-      })
-    return result
-
-  def get_entities(self, text, language='', encoding='UTF32'):
-    """Returns the list of annotations from the given text."""
-    document = nlp.types.Document(
-        content=text,
-        language=language,
-        type='PLAIN_TEXT'
-    )
-    response = self.client.analyze_entities(
-        document=document,
-        encoding_type=encoding,
-    )
-
-    result = []
-    for entity in response.entities:
-      mentions = entity.mentions
-      if not mentions: continue
-      entity_text = mentions[0].text
-      offset = entity_text.begin_offset
-      for word in entity_text.content.split():
-        result.append({
-            'content': word,
-            'beginOffset': offset
-        })
-        offset += len(word)
-    return result
