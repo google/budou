@@ -143,7 +143,7 @@ result = parser.parse(input_text, {'aria-describedby': element_id}, language='ja
 | --- | --- | --- | --- |
 | attributes | dictionary | `{'class': 'ww'}` | A key-value mapping for attributes of output SPAN tags. |
 | use_cache | boolean | `True` | Whether to use caching. |
-| language | str | `None` | Language of the text. If None is provided, NL API tries to detect from the input text. |
+| language | str | `None` | Language of the text. If `None` is provided, NL API tries to detect from the input text. |
 | use_entity | boolean | `False` | Whether to use Entity mode. |
 
 
