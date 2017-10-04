@@ -12,24 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+from pip import req
+import pip
 from setuptools import setup
 
-def read_file(name):
-  with open(os.path.join(os.path.dirname(__file__), name), 'r') as f:
-    return f.read().strip()
+_install_requirements = req.parse_requirements(
+    'requirements.txt', session=pip.download.PipSession())
+
 
 setup(
     name='budou',
-    version='0.6.1',
+    version='0.6.2',
     author='Shuhei Iitsuka',
     author_email='tushuhei@google.com',
     description='CJK Line Break Organizer',
     license='Apache',
     url='https://github.com/google/budou/',
     packages=['budou'],
-    install_requires=read_file('requirements.txt').splitlines(),
-    tests_require=read_file('requirements_dev.txt').splitlines(),
+    install_requires=[str(ir.req) for ir in _install_requirements],
+    tests_require=[
+        'mock'
+    ],
     scripts=[
         'budou/budou.py',
     ],
