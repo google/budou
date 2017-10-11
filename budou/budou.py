@@ -234,17 +234,18 @@ class Budou(object):
         from google.oauth2 import service_account
         credentials = service_account.Credentials.from_service_account_file(
             json_path)
+        scoped_credentials = credentials.with_scopes([
+          'https://www.googleapis.com/auth/cloud-platform'])
       except ImportError:
         print('Failed to load google.oauth2.service_account module.',
               'If you are running this script in Google App Engine',
               'environemnt, please call `authenticate` method with empty',
               'argument, which will result in caching results with memcache.')
     else:
-      credentials, project = google.auth.default()
-    scoped_credentials = credentials.with_scopes(
-        ['https://www.googleapis.com/auth/cloud-platform'])
-    auth_http = AuthorizedHttp(scoped_credentials)
-    service = discovery.build('language', 'v1beta2', http=auth_http)
+      scoped_credentials, project = google.auth.default([
+          'https://www.googleapis.com/auth/cloud-platform'])
+    service = discovery.build(
+        'language', 'v1beta2', credentials=scoped_credentials)
     return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
