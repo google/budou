@@ -22,8 +22,9 @@ import collections
 import google.auth
 from googleapiclient import discovery
 from google.auth.transport.urllib3 import AuthorizedHttp
-from lxml import etree
-from lxml import html
+import lxml.etree
+import lxml.html
+import html
 import re
 import six
 import unicodedata
@@ -284,7 +285,7 @@ class Budou(object):
       result_value = cache.get(source, language)
       if result_value: return result_value
     source = self._preprocess(source)
-    dom = html.fragment_fromstring(source, create_parent='body')
+    dom = lxml.html.fragment_fromstring(source, create_parent='body')
     input_text = dom.text_content()
 
     if language == 'ko':
@@ -460,10 +461,10 @@ class Budou(object):
     if dom.text:
       index += len(dom.text)
     for element in dom:
-      text = etree.tostring(
+      text = lxml.etree.tostring(
           element, with_tail=False, method='text',
           encoding='utf8').decode('utf8')
-      source = etree.tostring(
+      source = lxml.etree.tostring(
           element, with_tail=False, encoding='utf8').decode('utf8')
       elements.append(Element(text, element.tag, source, index))
       index += len(text)
@@ -489,6 +490,7 @@ class Budou(object):
         result.append(chunk.word)
       else:
         attribute_str = ' '.join(
-            '%s="%s"' % (k, v) for k, v in sorted(attributes.items()))
+            '%s="%s"' % (html.escape(k), html.escape(v))
+            for k, v in sorted(attributes.items()))
         result.append('<span %s>%s</span>' % (attribute_str, chunk.word))
     return ''.join(result)
