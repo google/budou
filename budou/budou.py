@@ -24,6 +24,8 @@ from googleapiclient import discovery
 from google.auth.transport.urllib3 import AuthorizedHttp
 import lxml.etree
 import lxml.html
+import html5lib
+from html5lib import sanitizer
 import re
 import six
 import unicodedata
@@ -285,8 +287,11 @@ class Budou(object):
       result_value = cache.get(source, language)
       if result_value: return result_value
     source = self._preprocess(source)
-    dom = lxml.html.fragment_fromstring(source, create_parent='body')
-    input_text = dom.text_content()
+    p = html5lib.HTMLParser(
+        tokenizer=sanitizer.HTMLSanitizer,
+        tree=html5lib.treebuilders.getTreeBuilder('etree'))
+    dom = p.parseFragment(source)
+    input_text = ''.join(dom.itertext())
 
     if language == 'ko':
       # Korean has spaces between words, so this simply parses words by space
