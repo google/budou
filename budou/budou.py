@@ -21,7 +21,6 @@ from . import api, cachefactory
 import collections
 import google.auth
 from googleapiclient import discovery
-from google.auth.transport.urllib3 import AuthorizedHttp
 import lxml.etree
 import lxml.html
 import re
@@ -175,33 +174,32 @@ class Budou(object):
 
   @classmethod
   def authenticate(cls, json_path=None):
-    """Authenticates user for Cloud Natural Language API and returns the parser.
+    """Authenticates for Cloud Natural Language API and returns a parser.
 
-    If the credential file path is not given, this tries to generate credentials
-    from default settings.
+    If a service account private key file is not given, it tries to authenticate
+    with default credentials.
 
     Args:
-      json_path: A file path to a credential JSON file for a Google Cloud
-          Project which Cloud Natural Language API is enabled. (str, optional)
+      json_path: A file path to a service account's JSON private keyfile.
+          (str, optional)
 
     Returns:
       Budou parser. (Budou)
     """
+    scope = ['https://www.googleapis.com/auth/cloud-platform']
     if json_path:
       try:
         from google.oauth2 import service_account
         credentials = service_account.Credentials.from_service_account_file(
             json_path)
-        scoped_credentials = credentials.with_scopes([
-          'https://www.googleapis.com/auth/cloud-platform'])
+        scoped_credentials = credentials.with_scopes(scope)
       except ImportError:
-        print('Failed to load google.oauth2.service_account module.',
-              'If you are running this script in Google App Engine',
-              'environemnt, please call `authenticate` method with empty',
-              'argument, which will result in caching results with memcache.')
+        print('''Failed to load google.oauth2.service_account module.
+              If you are running this script in Google App Engine environment,
+              please call `authenticate` method with empty argument to
+              authenticate with default credentials.''')
     else:
-      scoped_credentials, project = google.auth.default([
-          'https://www.googleapis.com/auth/cloud-platform'])
+      scoped_credentials, project = google.auth.default(scope)
     service = discovery.build(
         'language', 'v1beta2', credentials=scoped_credentials)
     return cls(service)
