@@ -484,12 +484,14 @@ class Budou(object):
     Returns:
       The organized HTML code. (str)
     """
-    result = []
+    result = ''
     for chunk in queue.chunks:
       if chunk.is_space():
-        result.append(chunk.word)
+        result += ' '
       else:
-        attribute_str = ' '.join('%s="%s"' % (escape(k), escape(v))
-            for k, v in sorted(attributes.items()))
-        result.append('<span %s>%s</span>' % (attribute_str, chunk.word))
-    return ''.join(result)
+        ele = lxml.etree.Element('span')
+        ele.text = chunk.word
+        for k, v in attributes.items():
+          ele.attrib[k] = v
+        result += lxml.etree.tostring(ele, encoding='utf-8').decode('utf-8')
+    return result
