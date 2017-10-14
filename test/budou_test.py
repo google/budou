@@ -58,71 +58,55 @@ class TestChunkMethods(unittest.TestCase):
           'Punctuation marks should be assigned with proper dependencies.')
 
 
-class TestChunkQueueMethods(unittest.TestCase):
+class TestChunkListMethods(unittest.TestCase):
   def setUp(self):
-    queue = budou.ChunkQueue()
-    chunks = [
-      budou.Chunk('ab', dependency=None),
-      budou.Chunk('cde', dependency=True),
-      budou.Chunk('fgh', dependency=False)]
-    for chunk in chunks:
-      queue.add(chunk)
-    self.queue = queue
+    chunks = budou.ChunkList()
+    chunks.append(budou.Chunk('ab', dependency=None))
+    chunks.append(budou.Chunk('cde', dependency=True))
+    chunks.append(budou.Chunk('fgh', dependency=False))
+    self.chunks = chunks
 
   def tearDown(self):
-    self.queue = None
-
-  def test_concatenate_inner(self):
-    result = self.queue._concatenate_inner(True)
-    self.assertEqual(
-        ['ab', 'cdefgh'], [chunk.word for chunk in self.queue.chunks],
-        'Chunks should be concatenated if they depends on the following word.')
-    self.assertEqual(
-        [None, False], [chunk.dependency for chunk in self.queue.chunks],
-        'Dependency should persist even if it\'s concatenated by others.')
-    result = self.queue._concatenate_inner(False)
-    self.assertEqual(
-        ['abcdefgh'], [chunk.word for chunk in self.queue.chunks],
-        'Chunks should be concatenated if they depends on the previous word.')
+    self.chunks = None
 
   def test_get_overlaps(self):
     # chunks: ab cde fgh
     # range : __ _*_ ___
-    chunks = self.queue.get_overlaps(3, 1)
+    chunks = self.chunks.get_overlaps(3, 1)
     expected = ['cde']
     self.assertEqual(expected, [chunk.word for chunk in chunks])
 
     # chunks: ab cde fgh
     # range : __ **_ ___
-    chunks = self.queue.get_overlaps(2, 2)
+    chunks = self.chunks.get_overlaps(2, 2)
     expected = ['cde']
     self.assertEqual(expected, [chunk.word for chunk in chunks])
 
     # chunks: ab cde fgh
     # range : _* **_ ___
-    chunks = self.queue.get_overlaps(1, 3)
+    chunks = self.chunks.get_overlaps(1, 3)
     expected = ['ab', 'cde']
     self.assertEqual(expected, [chunk.word for chunk in chunks])
 
     # chunks: ab cde fgh
     # range : _* *** ___
-    chunks = self.queue.get_overlaps(1, 4)
+    chunks = self.chunks.get_overlaps(1, 4)
     expected = ['ab', 'cde']
     self.assertEqual(expected, [chunk.word for chunk in chunks])
 
     # chunks: ab cde fgh
     # range : _* *** *__
-    chunks = self.queue.get_overlaps(1, 5)
+    chunks = self.chunks.get_overlaps(1, 5)
     expected = ['ab', 'cde', 'fgh']
     self.assertEqual(expected, [chunk.word for chunk in chunks])
 
   def test_swap(self):
-    old_chunks = self.queue.chunks[0:2]
+    old_chunks = self.chunks[0:2]
     new_chunk = budou.Chunk('ijk')
-    self.queue.swap(old_chunks, new_chunk)
+    self.chunks.swap(old_chunks, new_chunk)
     expected = ['ijk', 'fgh']
     self.assertEqual(
-        expected, [chunk.word for chunk in self.queue.chunks],
+        expected, [chunk.word for chunk in self.chunks],
         'Old chunks should be replaced with the new chunk.')
 
 
@@ -137,13 +121,6 @@ class TestBudouMethods(unittest.TestCase):
 
   def tearDown(self):
     self.parser = None
-
-  def reset_queue(self):
-    chunks = [budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')]
-    queue = budou.ChunkQueue()
-    for chunk in chunks:
-      queue.add(chunk)
-    return queue
 
   def test_parse(self):
     for case in self.cases.values():
@@ -164,9 +141,9 @@ class TestBudouMethods(unittest.TestCase):
   def test_get_chunks_per_space(self):
     source = 'a b'
     expected = ['a', ' ', 'b']
-    queue = self.parser._get_chunks_per_space(source)
+    chunks = self.parser._get_chunks_per_space(source)
     self.assertEqual(
-        expected, [chunk.word for chunk in queue.chunks],
+        expected, [chunk.word for chunk in chunks],
         'Input text should be parsed into chunks separated by spaces.')
 
   def test_get_attribute_dict(self):
@@ -240,7 +217,7 @@ class TestBudouMethods(unittest.TestCase):
   def test_get_source_chunks(self):
     budou.api.get_annotations = MagicMock(
         return_value=self.cases['ja-case1']['tokens'])
-    queue = self.parser._get_source_chunks(self.cases['ja-case1']['sentence'])
+    chunks = self.parser._get_source_chunks(self.cases['ja-case1']['sentence'])
     expected = [
         budou.Chunk(u'六本木', label='NN', pos='NOUN', dependency=None),
         budou.Chunk(u'ヒルズ', label='ADVPHMOD', pos='NOUN', dependency=None),
@@ -256,46 +233,50 @@ class TestBudouMethods(unittest.TestCase):
     ]
     self.assertEqual(
         [chunk.word for chunk in expected],
-        [chunk.word for chunk in queue.chunks],
+        [chunk.word for chunk in chunks],
         'Words should be match between input text and retrieved chunks.')
     self.assertEqual(
         [chunk.dependency for chunk in expected],
-        [chunk.dependency for chunk in queue.chunks],
+        [chunk.dependency for chunk in chunks],
         'Dependency should be match between input text and retrieved chunks.')
 
   def test_migrate_html(self):
     # chunks:  foo bar baz
     # element: ___ ba_ ___
-    queue = self.reset_queue()
+    chunks = budou.ChunkList([
+        budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')])
     elements = [budou.Element('ba', 'a', '<a href="#">ba</a>', 3)]
     expected = ['foo', '<a href="#">ba</a>r', 'baz']
-    result = self.parser._migrate_html(queue, elements)
-    self.assertEqual(expected, [chunk.word for chunk in result.chunks])
+    result = self.parser._migrate_html(chunks, elements)
+    self.assertEqual(expected, [chunk.word for chunk in result])
 
     # chunks:  foo bar baz
     # element: ___ bar b__
-    queue = self.reset_queue()
+    chunks = budou.ChunkList([
+        budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')])
     elements = [budou.Element('barb', 'a', '<a href="#">barb</a>', 3)]
     expected = ['foo', '<a href="#">barb</a>az']
-    result = self.parser._migrate_html(queue, elements)
-    self.assertEqual(expected, [chunk.word for chunk in result.chunks])
+    result = self.parser._migrate_html(chunks, elements)
+    self.assertEqual(expected, [chunk.word for chunk in result])
 
   def test_group_chunks_by_entities(self):
     # chunks: foo bar baz
     # entity: ___ bar ___
-    queue = self.reset_queue()
+    chunks = budou.ChunkList([
+        budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')])
     entities = [{'beginOffset': 3, 'content': 'bar'}]
     expected = ['foo', 'bar', 'baz']
-    result = self.parser._group_chunks_by_entities(queue, entities)
-    self.assertEqual(expected, [chunk.word for chunk in result.chunks])
+    result = self.parser._group_chunks_by_entities(chunks, entities)
+    self.assertEqual(expected, [chunk.word for chunk in result])
 
     # chunks: foo bar baz
     # entity: foo ba_ ___
-    queue = self.reset_queue()
+    chunks = budou.ChunkList([
+        budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')])
     entities = [{'beginOffset': 0, 'content': 'fooba'}]
     expected = ['foobar', 'baz']
-    result = self.parser._group_chunks_by_entities(queue, entities)
-    self.assertEqual(expected, [chunk.word for chunk in result.chunks])
+    result = self.parser._group_chunks_by_entities(chunks, entities)
+    self.assertEqual(expected, [chunk.word for chunk in result])
 
   def test_get_elements_list(self):
     dom = html.fragment_fromstring('click <a>this</a>', create_parent='body')
@@ -308,15 +289,9 @@ class TestBudouMethods(unittest.TestCase):
         'The input DOM should be processed to an element list.')
 
   def test_spanize(self):
-    queue = budou.ChunkQueue()
-    chunks = [
-        budou.Chunk('a'),
-        budou.Chunk('b'),
-        budou.Chunk.space(),
-        budou.Chunk('c'),
-    ]
-    for chunk in chunks:
-      queue.add(chunk)
+    chunks = budou.ChunkList([
+        budou.Chunk('a'), budou.Chunk('b'), budou.Chunk.space(),
+        budou.Chunk('c')])
     attributes = {
         'class': 'foo'
     }
@@ -324,10 +299,29 @@ class TestBudouMethods(unittest.TestCase):
         '<span class="foo">a</span>'
         '<span class="foo">b</span> '
         '<span class="foo">c</span>')
-    result = self.parser._spanize(queue, attributes)
+    result = self.parser._spanize(chunks, attributes)
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
+
+  def test_concatenate_inner(self):
+    chunks = budou.ChunkList()
+    chunks.append(budou.Chunk('ab', dependency=None))
+    chunks.append(budou.Chunk('cde', dependency=True))
+    chunks.append(budou.Chunk('fgh', dependency=False))
+
+    chunks = self.parser._concatenate_inner(chunks, True)
+    self.assertEqual(
+        ['ab', 'cdefgh'], [chunk.word for chunk in chunks],
+        'Chunks should be concatenated if they depends on the following word.')
+    self.assertEqual(
+        [None, False], [chunk.dependency for chunk in chunks],
+        'Dependency should persist even if it\'s concatenated by others.')
+
+    chunks = self.parser._concatenate_inner(chunks, False)
+    self.assertEqual(
+        ['abcdefgh'], [chunk.word for chunk in chunks],
+        'Chunks should be concatenated if they depends on the previous word.')
 
 
 if __name__ == '__main__':
