@@ -16,13 +16,13 @@
 """Package indicator for budou."""
 from .budou import Budou
 from .budou import Chunk
-from .budou import ChunkQueue
+from .budou import ChunkList
 from .budou import Element
 from .cachefactory import load_cache
 
 authenticate = Budou.authenticate
 Chunk = Chunk
-ChunkQueue = ChunkQueue
+ChunkList = ChunkList
 Element = Element
 
 load_cache = load_cache

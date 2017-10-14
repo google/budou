@@ -125,51 +125,8 @@ class Chunk(object):
         pass
 
 
-class ChunkQueue(object):
-  """Chunk queue object.
-
-  Attributes:
-    chunks: List of included Chunk objects. (list of Chunk)
-  """
-
-  def __init__(self):
-    self.chunks = []
-
-  def add(self, chunk):
-    """Adds a chunk to the chunk list."""
-    self.chunks.append(chunk)
-
-  def resolve_dependency(self):
-    """Resolves chunk dependency by concatenating them."""
-    self._concatenate_inner(True)
-    self._concatenate_inner(False)
-
-  def _concatenate_inner(self, direction):
-    """Concatenates chunks based on each chunk's dependency.
-
-    Args:
-      direction: Direction of concatenation process. True for forward. (bool)
-    """
-    result = []
-    tmp_bucket = []
-    chunks = self.chunks if direction else self.chunks[::-1]
-    for chunk in chunks:
-      if (
-            # if the chunk has matched dependency, do concatenation.
-            chunk.dependency == direction or
-            # if the chunk is SPACE, concatenate to the previous chunk.
-            (direction == False and chunk.is_space())
-        ):
-        tmp_bucket.append(chunk)
-        continue
-      tmp_bucket.append(chunk)
-      if not direction: tmp_bucket = tmp_bucket[::-1]
-      new_word = ''.join([tmp_chunk.word for tmp_chunk in tmp_bucket])
-      chunk.update_word(new_word)
-      result.append(chunk)
-      tmp_bucket = []
-    if tmp_bucket: result += tmp_bucket
-    self.chunks = result if direction else result[::-1]
+class ChunkList(list):
+  """Chunk list. """
 
   def get_overlaps(self, offset, length):
     """Returns chunks overlapped with the given range.
@@ -182,11 +139,11 @@ class ChunkQueue(object):
       Overlapped chunks. (list of Chunk)
     """
     # In case entity's offset points to a space just before the entity.
-    if ''.join([chunk.word for chunk in self.chunks])[offset] == ' ':
+    if ''.join([chunk.word for chunk in self])[offset] == ' ':
       offset += 1
     index = 0
     result = []
-    for chunk in self.chunks:
+    for chunk in self:
       if offset < index + len(chunk.word) and index < offset + length:
         result.append(chunk)
       index += len(chunk.word)
@@ -199,9 +156,9 @@ class ChunkQueue(object):
       old_chunks: List of consecutive Chunks to be removed. (list of Chunk)
       new_chunk: A Chunk to be inserted. (Chunk)
     """
-    indexes = [self.chunks.index(chunk) for chunk in old_chunks]
-    del self.chunks[indexes[0]:indexes[-1] + 1]
-    self.chunks.insert(indexes[0], new_chunk)
+    indexes = [self.index(chunk) for chunk in old_chunks]
+    del self[indexes[0]:indexes[-1] + 1]
+    self.insert(indexes[0], new_chunk)
 
 
 class Budou(object):
@@ -291,15 +248,15 @@ class Budou(object):
     if language == 'ko':
       # Korean has spaces between words, so this simply parses words by space
       # and wrap them as chunks.
-      queue = self._get_chunks_per_space(input_text)
+      chunks = self._get_chunks_per_space(input_text)
     else:
-      queue = self._get_chunks_with_api(input_text, language, use_entity)
+      chunks = self._get_chunks_with_api(input_text, language, use_entity)
     elements = self._get_elements_list(dom)
-    queue = self._migrate_html(queue, elements)
+    chunks = self._migrate_html(chunks, elements)
     attributes = self._get_attribute_dict(attributes, classname)
-    html_code = self._spanize(queue, attributes)
+    html_code = self._spanize(chunks, attributes)
     result_value = {
-        'chunks': [chunk.serialize() for chunk in queue.chunks],
+        'chunks': [chunk.serialize() for chunk in chunks],
         'html_code': html_code
     }
     if use_cache:
@@ -307,24 +264,24 @@ class Budou(object):
     return result_value
 
   def _get_chunks_per_space(self, input_text):
-    """Returns a chunk queue by separating words by spaces.
+    """Returns a chunk list by separating words by spaces.
 
     Args:
       input_text: String to parse. (str)
 
     Returns:
-      A queue of chunks. (ChunkQueue)
+      A chunk list. (ChunkList)
     """
-    queue = ChunkQueue()
+    chunks = ChunkList()
     words = input_text.split()
     for i, word in enumerate(words):
-      queue.add(Chunk(word))
+      chunks.append(Chunk(word))
       if i < len(words) - 1:  # Add no space after the last word.
-        queue.add(Chunk.space())
-    return queue
+        chunks.append(Chunk.space())
+    return chunks
 
   def _get_chunks_with_api(self, input_text, language=None, use_entity=False):
-    """Returns a chunk queue by using Google Cloud Natural Language API.
+    """Returns a chunk list by using Google Cloud Natural Language API.
 
     Args:
       input_text: String to parse. (str)
@@ -333,14 +290,14 @@ class Budou(object):
       (bool, optional)
 
     Returns:
-      A queue of chunks. (ChunkQueue)
+      A chunk list. (ChunkList)
     """
-    queue = self._get_source_chunks(input_text, language)
+    chunks = self._get_source_chunks(input_text, language)
     if use_entity:
       entities = api.get_entities(self.service, input_text, language)
-      queue = self._group_chunks_by_entities(queue, entities)
-    queue.resolve_dependency()
-    return queue
+      chunks = self._group_chunks_by_entities(chunks, entities)
+    chunks = self._resolve_dependency(chunks)
+    return chunks
 
   def _get_attribute_dict(self, attributes, classname=None):
     """Returns a dictionary of HTML element attributes.
@@ -380,7 +337,7 @@ class Budou(object):
     return source
 
   def _get_source_chunks(self, input_text, language=None):
-    """Returns a chunk queue retrieved from Syntax Analysis results.
+    """Returns a chunk list retrieved from Syntax Analysis results.
 
     Args:
       input_text: Text to annotate. (str)
@@ -388,9 +345,9 @@ class Budou(object):
           (str, optional)
 
     Returns:
-      A queue of chunks. (ChunkQueue)
+      A chunk list. (ChunkList)
     """
-    queue = ChunkQueue()
+    chunks = ChunkList()
     sentence_length = 0
     tokens = api.get_annotations(self.service, input_text, language)
     for i, token in enumerate(tokens):
@@ -399,53 +356,53 @@ class Budou(object):
       label = token['dependencyEdge']['label']
       pos = token['partOfSpeech']['tag']
       if begin_offset > sentence_length:
-        queue.add(Chunk.space())
+        chunks.append(Chunk.space())
         sentence_length = begin_offset
       chunk = Chunk(word, pos, label)
       # Determining default concatenating direction based on syntax dependency.
       chunk.maybe_add_dependency(
           i < token['dependencyEdge']['headTokenIndex'])
-      queue.add(chunk)
+      chunks.append(chunk)
       sentence_length += len(word)
-    return queue
+    return chunks
 
-  def _migrate_html(self, queue, elements):
+  def _migrate_html(self, chunks, elements):
     """Migrates HTML elements to the word chunks by bracketing each element.
 
     Args:
-      queue: The queue of chunks to be processed. (ChunkQueue)
+      chunks: The list of chunks to be processed. (ChunkList)
       elements: List of Element. (list of Element)
 
     Returns:
-      A queue of chunks. (ChunkQueue)
+      A chunk list. (ChunkList)
     """
     for element in elements:
-      concat_chunks = queue.get_overlaps(element.index, len(element.text))
-      if not concat_chunks: continue
-      new_chunk_word = u''.join([chunk.word for chunk in concat_chunks])
+      chunks_to_concat = chunks.get_overlaps(element.index, len(element.text))
+      if not chunks_to_concat: continue
+      new_chunk_word = u''.join([chunk.word for chunk in chunks_to_concat])
       new_chunk_word = new_chunk_word.replace(element.text, element.source)
       new_chunk = Chunk.html(new_chunk_word)
-      queue.swap(concat_chunks, new_chunk)
-    return queue
+      chunks.swap(chunks_to_concat, new_chunk)
+    return chunks
 
-  def _group_chunks_by_entities(self, queue, entities):
+  def _group_chunks_by_entities(self, chunks, entities):
     """Groups chunks by entities retrieved from NL API Entity Analysis.
 
     Args:
-      queue: The queue of chunks to be processed. (ChunkQueue)
+      chunks: The list of chunks to be processed. (ChunkList)
       entities: List of entities. (list of dict)
 
     Returns:
-      A queue of chunks. (ChunkQueue)
+      A chunk list. (ChunkList)
     """
     for entity in entities:
-      concat_chunks = queue.get_overlaps(
+      chunks_to_concat = chunks.get_overlaps(
           entity['beginOffset'], len(entity['content']))
-      if not concat_chunks: continue
-      new_chunk_word = u''.join([chunk.word for chunk in concat_chunks])
+      if not chunks_to_concat: continue
+      new_chunk_word = u''.join([chunk.word for chunk in chunks_to_concat])
       new_chunk = Chunk(new_chunk_word)
-      queue.swap(concat_chunks, new_chunk)
-    return queue
+      chunks.swap(chunks_to_concat, new_chunk)
+    return chunks
 
   def _get_elements_list(self, dom):
     """Digs DOM to the first depth and returns the list of elements.
@@ -471,11 +428,11 @@ class Budou(object):
       if element.tail: index += len(element.tail)
     return elements
 
-  def _spanize(self, queue, attributes):
+  def _spanize(self, chunks, attributes):
     """Returns concatenated HTML code with SPAN tag.
 
     Args:
-      queue: The queue of chunks to be processed. (ChunkQueue)
+      chunks: The list of chunks to be processed. (ChunkList)
       attributes: If a dictionary, it should be a map of name-value pairs for
           attributes of output SPAN tags. If a string, it should be a class name
           of output SPAN tags. If an array, it should be a list of class names
@@ -485,7 +442,7 @@ class Budou(object):
       The organized HTML code. (str)
     """
     result = ''
-    for chunk in queue.chunks:
+    for chunk in chunks:
       if chunk.is_space():
         result += ' '
       else:
@@ -495,3 +452,36 @@ class Budou(object):
           ele.attrib[k] = v
         result += lxml.etree.tostring(ele, encoding='utf-8').decode('utf-8')
     return result
+
+  def _resolve_dependency(self, chunks):
+    """Resolves chunk dependency by concatenating them."""
+    chunks = self._concatenate_inner(chunks, True)
+    chunks = self._concatenate_inner(chunks, False)
+    return chunks
+
+  def _concatenate_inner(self, chunks, direction):
+    """Concatenates chunks based on each chunk's dependency.
+
+    Args:
+      direction: Direction of concatenation process. True for forward. (bool)
+    """
+    tmp_bucket = []
+    source_chunks = chunks if direction else chunks[::-1]
+    target_chunks = ChunkList()
+    for chunk in source_chunks:
+      if (
+            # if the chunk has matched dependency, do concatenation.
+            chunk.dependency == direction or
+            # if the chunk is SPACE, concatenate to the previous chunk.
+            (direction == False and chunk.is_space())
+        ):
+        tmp_bucket.append(chunk)
+        continue
+      tmp_bucket.append(chunk)
+      if not direction: tmp_bucket = tmp_bucket[::-1]
+      new_word = ''.join([tmp_chunk.word for tmp_chunk in tmp_bucket])
+      chunk.update_word(new_word)
+      target_chunks.append(chunk)
+      tmp_bucket = []
+    if tmp_bucket: target_chunks += tmp_bucket
+    return target_chunks if direction else target_chunks[::-1]
