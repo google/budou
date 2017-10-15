@@ -22,7 +22,6 @@ import collections
 import google.auth
 from googleapiclient import discovery
 import lxml.etree
-import lxml.html
 import re
 import six
 import unicodedata
@@ -209,7 +208,7 @@ class Budou(object):
     """Parses input HTML code into word chunks and organized code.
 
     Args:
-      source: HTML code to be processed. (str)
+      source: Text to be processed. (str)
       attributes: A key-value mapping for attributes of output elements.
           (dictionary, optional)
           **This argument used to accept a string or a list of strings to
@@ -239,9 +238,7 @@ class Budou(object):
     if use_cache:
       result_value = cache.get(source, language)
       if result_value: return result_value
-    source = self._preprocess(source)
-    dom = lxml.html.fragment_fromstring(source, create_parent='body')
-    input_text = dom.text_content()
+    input_text = self._preprocess(source)
 
     if language == 'ko':
       # Korean has spaces between words, so this simply parses words by space
@@ -249,10 +246,8 @@ class Budou(object):
       chunks = self._get_chunks_per_space(input_text)
     else:
       chunks = self._get_chunks_with_api(input_text, language, use_entity)
-    elements = self._get_elements_list(dom)
-    chunks = self._migrate_html(chunks, elements)
     attributes = self._get_attribute_dict(attributes, classname)
-    html_code = self._spanize(chunks, attributes)
+    html_code = self._html_serialize(chunks, attributes)
     result_value = {
         'chunks': [chunk.serialize() for chunk in chunks],
         'html_code': html_code
@@ -364,25 +359,6 @@ class Budou(object):
       sentence_length += len(word)
     return chunks
 
-  def _migrate_html(self, chunks, elements):
-    """Migrates HTML elements to the word chunks by bracketing each element.
-
-    Args:
-      chunks: The list of chunks to be processed. (ChunkList)
-      elements: List of Element. (list of Element)
-
-    Returns:
-      A chunk list. (ChunkList)
-    """
-    for element in elements:
-      chunks_to_concat = chunks.get_overlaps(element.index, len(element.text))
-      if not chunks_to_concat: continue
-      new_chunk_word = u''.join([chunk.word for chunk in chunks_to_concat])
-      new_chunk_word = new_chunk_word.replace(element.text, element.source)
-      new_chunk = Chunk.html(new_chunk_word)
-      chunks.swap(chunks_to_concat, new_chunk)
-    return chunks
-
   def _group_chunks_by_entities(self, chunks, entities):
     """Groups chunks by entities retrieved from NL API Entity Analysis.
 
@@ -402,31 +378,7 @@ class Budou(object):
       chunks.swap(chunks_to_concat, new_chunk)
     return chunks
 
-  def _get_elements_list(self, dom):
-    """Digs DOM to the first depth and returns the list of elements.
-
-    Args:
-      dom: DOM to access the given HTML source. (lxml.html.HtmlElement)
-
-    Returns:
-      A list of elements. (list of Element)
-    """
-    elements = []
-    index = 0
-    if dom.text:
-      index += len(dom.text)
-    for element in dom:
-      text = lxml.etree.tostring(
-          element, with_tail=False, method='text',
-          encoding='utf8').decode('utf8')
-      source = lxml.etree.tostring(
-          element, with_tail=False, encoding='utf8').decode('utf8')
-      elements.append(Element(text, element.tag, source, index))
-      index += len(text)
-      if element.tail: index += len(element.tail)
-    return elements
-
-  def _spanize(self, chunks, attributes):
+  def _html_serialize(self, chunks, attributes):
     """Returns concatenated HTML code with SPAN tag.
 
     Args:
