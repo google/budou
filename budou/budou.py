@@ -404,7 +404,11 @@ class Budou(object):
     return result
 
   def _resolve_dependency(self, chunks):
-    """Resolves chunk dependency by concatenating them."""
+    """Resolves chunk dependency by concatenating them.
+
+    Args:
+      chunks: a chink list. (ChunkList)
+    """
     chunks = self._concatenate_inner(chunks, True)
     chunks = self._concatenate_inner(chunks, False)
     return chunks
