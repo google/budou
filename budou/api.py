@@ -16,7 +16,9 @@ def get_annotations(service, text, language='', encoding='UTF32'):
 
   request = service.documents().annotateText(body=body)
   response = request.execute()
-  return response.get('tokens', [])
+  tokens = response.get('tokens', [])
+  language = response.get('language')
+  return tokens, language
 
 def get_entities(service, text, language='', encoding='UTF32'):
   """Returns the list of annotations from the given text."""
