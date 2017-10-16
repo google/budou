@@ -237,12 +237,15 @@ class Budou(object):
       # and wrap them as chunks.
       chunks = self._get_chunks_per_space(input_text)
     else:
-      chunks = self._get_chunks_with_api(input_text, language, use_entity)
+      chunks, tokens, language = self._get_chunks_with_api(
+          input_text, language, use_entity)
     attributes = self._get_attribute_dict(attributes, classname)
     html_code = self._html_serialize(chunks, attributes)
     result_value = {
         'chunks': [chunk.serialize() for chunk in chunks],
-        'html_code': html_code
+        'html_code': html_code,
+        'language': language,
+        'tokens': tokens,
     }
     if use_cache:
       cache.set(source, language, result_value)
@@ -277,12 +280,12 @@ class Budou(object):
     Returns:
       A chunk list. (ChunkList)
     """
-    chunks = self._get_source_chunks(input_text, language)
+    chunks, tokens, language = self._get_source_chunks(input_text, language)
     if use_entity:
       entities = api.get_entities(self.service, input_text, language)
       chunks = self._group_chunks_by_entities(chunks, entities)
     chunks = self._resolve_dependency(chunks)
-    return chunks
+    return chunks, tokens, language
 
   def _get_attribute_dict(self, attributes, classname=None):
     """Returns a dictionary of HTML element attributes.
@@ -334,7 +337,7 @@ class Budou(object):
     """
     chunks = ChunkList()
     sentence_length = 0
-    tokens = api.get_annotations(self.service, input_text, language)
+    tokens, language = api.get_annotations(self.service, input_text, language)
     for i, token in enumerate(tokens):
       word = token['text']['content']
       begin_offset = token['text']['beginOffset']
@@ -349,7 +352,7 @@ class Budou(object):
           i < token['dependencyEdge']['headTokenIndex'])
       chunks.append(chunk)
       sentence_length += len(word)
-    return chunks
+    return chunks, tokens, language
 
   def _group_chunks_by_entities(self, chunks, entities):
     """Groups chunks by entities retrieved from NL API Entity Analysis.
