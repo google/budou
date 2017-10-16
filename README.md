@@ -19,7 +19,7 @@ be split at the end of a line by specifying their `display` property as
 
 
 ## Install
-Install the library by running ` pip install budou`.
+Install the library by running `pip install budou`.
 Also, a credential json file is needed for authorization to NL API.
 
 ## How to use
@@ -55,9 +55,11 @@ conditioning each `SPAN` tag with `display: inline-block` in CSS.
 
 
 ## Supported Language
-- Japanese
+- Japanese (ja)
+- Simplified Chinese (zh)
+- Traditional Chinese (zh-Hans)
 
-Support for other Asian languages with line break issues, such as Chinese and
+Support for other Asian languages with line break issues, such as
 Thai, will be added as Cloud Natural Language API adds support.
 
 ### Korean support?

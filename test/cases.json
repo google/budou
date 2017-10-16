@@ -96,6 +96,49 @@
     "expected": ["随时", "互动", "交流", "并", "掌握", "最新", "上海", "动态"],
     "expected_with_entity": ["随时", "互动", "交流", "并", "掌握", "最新", "上海动态"]
   },
+  "zh-case2": {
+    "sentence": "隨時互動交流並掌握最新上海動態",
+    "language": "zh-Hans",
+    "tokens": [{
+      "dependencyEdge": {"headTokenIndex": 4, "label": "NSUBJ"},
+      "partOfSpeech": {"tag": "UNKNOWN"},
+      "text": {"beginOffset": 0, "content": "隨時"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 2, "label": "VMOD"},
+      "partOfSpeech": {"tag": "VERB"},
+      "text": {"beginOffset": 2, "content": "互動"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 0, "label": "DOBJ"},
+      "partOfSpeech": {"tag": "NOUN"},
+      "text": {"beginOffset": 4, "content": "交流"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 4, "label": "MARK"},
+      "partOfSpeech": {"tag": "ADV"},
+      "text": {"beginOffset": 6, "content": "並"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 4, "label": "ROOT"},
+      "partOfSpeech": {"tag": "VERB"},
+      "text": {"beginOffset": 7, "content": "掌握"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 7, "label": "AMOD"},
+      "partOfSpeech": {"tag": "ADJ"},
+      "text": {"beginOffset": 9, "content": "最新"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 7, "label": "NN"},
+      "partOfSpeech": {"tag": "NOUN"},
+      "text": {"beginOffset": 11, "content": "上海"}
+    }, {
+      "dependencyEdge": {"headTokenIndex": 4, "label": "DOBJ"},
+      "partOfSpeech": {"tag": "NOUN"},
+      "text": {"beginOffset": 13, "content": "動態"}
+    }],
+    "entities": [
+      {"beginOffset": 4, "content": "交流"},
+      {"beginOffset": 11, "content": "上海動態"}
+    ],
+    "expected": ["隨時", "互動", "交流", "並", "掌握", "最新", "上海", "動態"],
+    "expected_with_entity": ["隨時", "互動", "交流", "並", "掌握", "最新", "上海動態"]
+  },
   "ja-case2": {
     "sentence": "これは Android です。",
     "language": "ja",
