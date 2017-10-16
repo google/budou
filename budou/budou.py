@@ -26,7 +26,6 @@ from lxml.html.clean import clean_html
 import re
 import six
 import unicodedata
-from xml.sax.saxutils import escape
 
 cache = cachefactory.load_cache()
 
