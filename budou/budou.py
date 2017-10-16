@@ -30,16 +30,6 @@ from xml.sax.saxutils import escape
 
 cache = cachefactory.load_cache()
 
-Element = collections.namedtuple('Element', ['text', 'tag', 'source', 'index'])
-"""HTML element.
-
-Attributes:
-  text: Text of the element. (str)
-  tag: Tag name of the element. (str)
-  source: HTML source of the element. (str)
-  index: Character-wise offset from the top of the sentence. (int)
-"""
-
 
 class Chunk(object):
   """Chunk object. This represents a unit for word segmentation.

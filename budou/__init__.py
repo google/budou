@@ -17,12 +17,10 @@
 from .budou import Budou
 from .budou import Chunk
 from .budou import ChunkList
-from .budou import Element
 from .cachefactory import load_cache
 
 authenticate = Budou.authenticate
 Chunk = Chunk
 ChunkList = ChunkList
-Element = Element
 
 load_cache = load_cache
