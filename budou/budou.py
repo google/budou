@@ -67,6 +67,19 @@ class Chunk(object):
     """Checks if this is space Chunk."""
     return self.pos == self.SPACE_POS
 
+  def has_cjk(self):
+    """Checks if this contains CJK characters"""
+    i = 0
+    while i < len(self.word):
+      if any([start <= ord(self.word[i]) <= end for start, end in
+          [(4352, 4607), (11904, 42191), (43072, 43135), (44032, 55215),
+           (63744, 64255), (65072, 65103), (65381, 65500),
+           (131072, 196607)]
+          ]):
+        return True
+      i += 1
+    return False
+
   def update_word(self, word):
     """Updates the word of the chunk."""
     self.word = word
@@ -373,15 +386,30 @@ class Budou(object):
     for chunk in chunks:
       if chunk.is_space():
         if doc.getchildren():
-          doc.getchildren()[-1].tail = ' '
+          if doc.getchildren()[-1].tail is None:
+            doc.getchildren()[-1].tail = ' '
+          else:
+            doc.getchildren()[-1].tail += ' '
         else:
           pass
       else:
-        ele = lxml.etree.Element('span')
-        ele.text = chunk.word
-        for k, v in attributes.items():
-          ele.attrib[k] = v
-        doc.append(ele)
+        if chunk.has_cjk():
+          ele = lxml.etree.Element('span')
+          ele.text = chunk.word
+          for k, v in attributes.items():
+            ele.attrib[k] = v
+          doc.append(ele)
+        else:
+          if doc.getchildren():
+            if doc.getchildren()[-1].tail is None:
+              doc.getchildren()[-1].tail = chunk.word
+            else:
+              doc.getchildren()[-1].tail += chunk.word
+          else:
+            if doc.text is None:
+              doc.text = chunk.word
+            else:
+              doc.text += chunk.word
     result = lxml.etree.tostring(
         doc, pretty_print=False, encoding='utf-8').decode('utf-8')
     result = clean_html(result)
