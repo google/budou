@@ -130,14 +130,31 @@ class TestBudouMethods(unittest.TestCase):
       result = self.parser.parse(
           source, language=case['language'], use_cache=False, use_entity=False)
       expected = case['expected']
-      self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
+      self.assertEqual(
+          expected, [chunk['word'] for chunk in result['chunks']], (
+          'Chunks do not match in a test case below. (entity mode off)\n'
+          'Source: %s\n'
+          'Expected: %s\n'
+          'Actual: %s\n'% (
+            source, '/'.join(expected),
+            '/'.join([chunk['word'] for chunk in result['chunks']]))
+          ).encode('utf-8')
+      )
 
       result = self.parser.parse(
           source, language=case['language'], use_cache=False, use_entity=True)
       if 'expected_with_entity' in case:
         expected = case['expected_with_entity']
         self.assertEqual(
-            expected, [chunk['word'] for chunk in result['chunks']])
+            expected, [chunk['word'] for chunk in result['chunks']], (
+            'Chunks do not match in a test case below. (entity mode on)\n'
+            'Source: %s\n'
+            'Expected: %s\n'
+            'Actual: %s\n'% (
+              source, '/'.join(expected),
+              '/'.join([chunk['word'] for chunk in result['chunks']]))
+            ).encode('utf-8')
+        )
 
   def test_get_chunks_per_space(self):
     source = 'a b'

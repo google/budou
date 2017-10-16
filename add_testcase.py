@@ -4,6 +4,7 @@ import budou
 import json
 
 TESTCASES_PATH = 'test/cases.ndjson'
+DELIMITER = '|'
 
 def colorize(text, color='green'):
   ENDC = '\033[0m'
@@ -22,24 +23,29 @@ def main():
   print('Press Ctrl-C to exit.')
   parser = budou.authenticate()
 
-  while True:
-    source = input(
-        colorize('Input a source sentence to process: ')).decode('utf-8')
-    if not source:
-      print(colorize('No test case was provided. Try again.', 'red'))
-      continue
-    source = source.strip()
-    print('Your input: %s' % (source))
-    result = parser.parse(source, use_cache=False, use_entity=False)
-    print(colorize('Retrived chunks from current implementation:', 'blue'))
-    for chunk in result['chunks']:
-      print('pos: %s\tword: "%s"' % (chunk['pos'], chunk['word']))
-    is_correct = ask_if_correct()
-    if is_correct:
-      words = [chunk['word'] for chunk in result['chunks']]
-    else:
-      words = ask_expectation(source)
-    add_test_case(source, words, result['tokens'], result['language'])
+  try:
+    while True:
+      source = input(
+          colorize('Input a source sentence to process: ')).decode('utf-8')
+      if not source:
+        print(colorize('No test case was provided. Try again.', 'red'))
+        continue
+      if source == 'exit':
+        print('Bye.')
+        break
+      source = source.strip()
+      print('Your input: %s' % (source))
+      result = parser.parse(source, use_cache=False, use_entity=False)
+      print(colorize('Retrived chunks from current implementation:', 'blue'))
+      print(DELIMITER.join([chunk['word'] for chunk in result['chunks']]))
+      is_correct = ask_if_correct()
+      if is_correct:
+        words = [chunk['word'] for chunk in result['chunks']]
+      else:
+        words = ask_expectation(source)
+      add_test_case(source, words, result['tokens'], result['language'])
+  except KeyboardInterrupt:
+    print('\nBye.')
 
 def ask_if_correct():
   while True:
@@ -56,13 +62,14 @@ def ask_if_correct():
 def ask_expectation(source):
   print('Uh-oh. Please input the expected result by separating the sentence '
         'with slashes.')
-  print('e.g. 今日の/ランチは/カツ丼です。')
+  print('e.g. %s' % (
+        DELIMITER.join([u'これは', u'Google ', u'Home と', u'猫です。'])))
   while True:
     response = input(colorize('Input expected result: ')).decode('utf-8')
     if not response:
       print(colorize('No input was provided. Try again.', 'red'))
       continue
-    words = response.split('/')
+    words = response.split(DELIMITER)
     if ''.join(words) != source:
       print(colorize(
         'The input has different words from source input. Please verify if '
@@ -105,7 +112,7 @@ def add_test_case(source, words, tokens, language):
       'language': language,
       'tokens': tokens,
       'expected': words,
-    }, ensure_ascii=False, sort_keys=True).encode('utf-8'))
+    }, ensure_ascii=False, sort_keys=True).encode('utf-8') + '\n')
   print('Thank you for submission. Your test case "%s" is added.\n\n' % (
       source))
 
