@@ -53,10 +53,6 @@ class Chunk(object):
     self.dependency = dependency
     self._add_dependency_if_punct()
 
-  def __repr__(self):
-    return '<Chunk %s pos: %s, label: %s, dependency: %s>' % (
-        self.word, self.pos, self.label, self.dependency)
-
   @classmethod
   def space(cls):
     """Creates space Chunk."""
