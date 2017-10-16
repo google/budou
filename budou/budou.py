@@ -68,7 +68,10 @@ class Chunk(object):
     return self.pos == self.SPACE_POS
 
   def has_cjk(self):
-    """Checks if the word of the chunk contains CJK characters"""
+    """Checks if the word of the chunk contains CJK characters
+
+    Using range from https://github.com/nltk/nltk/blob/develop/nltk/tokenize/util.py#L149
+    """
     for char in self.word:
       if any([start <= ord(char) <= end for start, end in
           [(4352, 4607), (11904, 42191), (43072, 43135), (44032, 55215),
