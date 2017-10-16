@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from lxml import html
 from mock import MagicMock
 import budou
 import json
@@ -240,25 +239,6 @@ class TestBudouMethods(unittest.TestCase):
         [chunk.dependency for chunk in chunks],
         'Dependency should be match between input text and retrieved chunks.')
 
-  def test_migrate_html(self):
-    # chunks:  foo bar baz
-    # element: ___ ba_ ___
-    chunks = budou.ChunkList([
-        budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')])
-    elements = [budou.Element('ba', 'a', '<a href="#">ba</a>', 3)]
-    expected = ['foo', '<a href="#">ba</a>r', 'baz']
-    result = self.parser._migrate_html(chunks, elements)
-    self.assertEqual(expected, [chunk.word for chunk in result])
-
-    # chunks:  foo bar baz
-    # element: ___ bar b__
-    chunks = budou.ChunkList([
-        budou.Chunk('foo'), budou.Chunk('bar'), budou.Chunk('baz')])
-    elements = [budou.Element('barb', 'a', '<a href="#">barb</a>', 3)]
-    expected = ['foo', '<a href="#">barb</a>az']
-    result = self.parser._migrate_html(chunks, elements)
-    self.assertEqual(expected, [chunk.word for chunk in result])
-
   def test_group_chunks_by_entities(self):
     # chunks: foo bar baz
     # entity: ___ bar ___
@@ -278,17 +258,7 @@ class TestBudouMethods(unittest.TestCase):
     result = self.parser._group_chunks_by_entities(chunks, entities)
     self.assertEqual(expected, [chunk.word for chunk in result])
 
-  def test_get_elements_list(self):
-    dom = html.fragment_fromstring('click <a>this</a>', create_parent='body')
-    expected = [
-        budou.Element('this', 'a', '<a>this</a>', 6)
-    ]
-    result = self.parser._get_elements_list(dom)
-    self.assertEqual(
-        result, expected,
-        'The input DOM should be processed to an element list.')
-
-  def test_spanize(self):
+  def test_html_serialize(self):
     chunks = budou.ChunkList([
         budou.Chunk('a'), budou.Chunk('b'), budou.Chunk.space(),
         budou.Chunk('c')])
@@ -296,10 +266,12 @@ class TestBudouMethods(unittest.TestCase):
         'class': 'foo'
     }
     expected = (
+        '<span>'
         '<span class="foo">a</span>'
         '<span class="foo">b</span> '
-        '<span class="foo">c</span>')
-    result = self.parser._spanize(chunks, attributes)
+        '<span class="foo">c</span>'
+        '</span>')
+    result = self.parser._html_serialize(chunks, attributes)
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
