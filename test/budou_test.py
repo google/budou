@@ -115,7 +115,7 @@ class TestBudouMethods(unittest.TestCase):
     self.parser = budou.Budou(None)
     cases_path = os.path.join(os.path.dirname(__file__), 'cases.ndjson')
     with open(cases_path) as f:
-      self.cases = [json.loads(row) for row in f.readlines() if row]
+      self.cases = [json.loads(row) for row in f.readlines() if row.strip()]
 
   def tearDown(self):
     self.parser = None
@@ -124,7 +124,8 @@ class TestBudouMethods(unittest.TestCase):
     for case in self.cases:
       # Mocks external API request.
       budou.api.get_annotations = MagicMock(return_value=(case['tokens'], None))
-      budou.api.get_entities = MagicMock(return_value=case['entities'])
+      mock_entities = case['entities'] if 'entities' in case else []
+      budou.api.get_entities = MagicMock(return_value=mock_entities)
       source = case['sentence']
       result = self.parser.parse(
           source, language=case['language'], use_cache=False, use_entity=False)
@@ -133,8 +134,10 @@ class TestBudouMethods(unittest.TestCase):
 
       result = self.parser.parse(
           source, language=case['language'], use_cache=False, use_entity=True)
-      expected = case['expected_with_entity']
-      self.assertEqual(expected, [chunk['word'] for chunk in result['chunks']])
+      if 'expected_with_entity' in case:
+        expected = case['expected_with_entity']
+        self.assertEqual(
+            expected, [chunk['word'] for chunk in result['chunks']])
 
   def test_get_chunks_per_space(self):
     source = 'a b'
