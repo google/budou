@@ -260,16 +260,17 @@ class TestBudouMethods(unittest.TestCase):
 
   def test_html_serialize(self):
     chunks = budou.ChunkList([
-        budou.Chunk('a'), budou.Chunk('b'), budou.Chunk.space(),
-        budou.Chunk('c')])
+        budou.Chunk('Hello'), budou.Chunk.space(), budou.Chunk(u'今天'),
+        budou.Chunk(u'天气'), budou.Chunk(u'很好')])
     attributes = {
         'class': 'foo'
     }
     expected = (
         '<span>'
-        '<span class="foo">a</span>'
-        '<span class="foo">b</span> '
-        '<span class="foo">c</span>'
+        'Hello '
+        u'<span class="foo">今天</span>'
+        u'<span class="foo">天气</span>' 
+        u'<span class="foo">很好</span>'
         '</span>')
     result = self.parser._html_serialize(chunks, attributes)
     self.assertEqual(
