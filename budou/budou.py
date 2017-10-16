@@ -22,6 +22,7 @@ import collections
 import google.auth
 from googleapiclient import discovery
 import lxml.etree
+from lxml.html.clean import clean_html
 import re
 import six
 import unicodedata
@@ -391,16 +392,22 @@ class Budou(object):
     Returns:
       The organized HTML code. (str)
     """
-    result = ''
+    doc = lxml.etree.Element('span')
     for chunk in chunks:
       if chunk.is_space():
-        result += ' '
+        if doc.getchildren():
+          doc.getchildren()[-1].tail = ' '
+        else:
+          pass
       else:
         ele = lxml.etree.Element('span')
         ele.text = chunk.word
         for k, v in attributes.items():
           ele.attrib[k] = v
-        result += lxml.etree.tostring(ele, encoding='utf-8').decode('utf-8')
+        doc.append(ele)
+    result = lxml.etree.tostring(
+        doc, pretty_print=False, encoding='utf-8').decode('utf-8')
+    result = clean_html(result)
     return result
 
   def _resolve_dependency(self, chunks):

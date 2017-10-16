@@ -266,9 +266,11 @@ class TestBudouMethods(unittest.TestCase):
         'class': 'foo'
     }
     expected = (
+        '<span>'
         '<span class="foo">a</span>'
         '<span class="foo">b</span> '
-        '<span class="foo">c</span>')
+        '<span class="foo">c</span>'
+        '</span>')
     result = self.parser._html_serialize(chunks, attributes)
     self.assertEqual(
         result, expected,
