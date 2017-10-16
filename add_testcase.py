@@ -85,7 +85,7 @@ def ask_expectation(source):
 
 def add_test_case(source, words, tokens, language):
   with open(TESTCASES_PATH) as f:
-    cases = [json.loads(row) for row in f.readlines() if row]
+    cases = [json.loads(row) for row in f.readlines() if row.strip()]
   for case in cases:
     if case['sentence'] == source:
       print('The test case "%s" is already included.' % (source))
