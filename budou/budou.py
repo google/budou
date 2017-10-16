@@ -68,16 +68,14 @@ class Chunk(object):
     return self.pos == self.SPACE_POS
 
   def has_cjk(self):
-    """Checks if this contains CJK characters"""
-    i = 0
-    while i < len(self.word):
-      if any([start <= ord(self.word[i]) <= end for start, end in
+    """Checks if the word of the chunk contains CJK characters"""
+    for char in self.word:
+      if any([start <= ord(char) <= end for start, end in
           [(4352, 4607), (11904, 42191), (43072, 43135), (44032, 55215),
            (63744, 64255), (65072, 65103), (65381, 65500),
            (131072, 196607)]
           ]):
         return True
-      i += 1
     return False
 
   def update_word(self, word):
@@ -403,6 +401,8 @@ class Budou(object):
             ele.attrib[k] = v
           doc.append(ele)
         else:
+          # add word without span tag for non-CJK text (e.g. English)
+          # by appending it after the last element
           if doc.getchildren():
             if doc.getchildren()[-1].tail is None:
               doc.getchildren()[-1].tail = chunk.word
