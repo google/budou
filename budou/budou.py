@@ -393,7 +393,7 @@ class Budou(object):
         else:
           if doc.text is not None:
             # We want to preserve space in cases like "Hello 你好"
-            # But the space in " 你好" can be discard.
+            # But the space in " 你好" can be discarded.
             doc.text += ' '
       else:
         if chunk.has_cjk():
