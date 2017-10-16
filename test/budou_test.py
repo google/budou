@@ -123,7 +123,7 @@ class TestBudouMethods(unittest.TestCase):
   def test_parse(self):
     for case in self.cases:
       # Mocks external API request.
-      budou.api.get_annotations = MagicMock(return_value=case['tokens'])
+      budou.api.get_annotations = MagicMock(return_value=(case['tokens'], None))
       budou.api.get_entities = MagicMock(return_value=case['entities'])
       source = case['sentence']
       result = self.parser.parse(
@@ -213,7 +213,7 @@ class TestBudouMethods(unittest.TestCase):
         'BR tags, line breaks, and unnecessary spaces should be removed.')
 
   def test_get_source_chunks(self):
-    budou.api.get_annotations = MagicMock(return_value=[{
+    tokens = [{
         'dependencyEdge': {'headTokenIndex': 1, 'label': 'NN'},
         'partOfSpeech': {'tag': 'NOUN'},
         'text': {'beginOffset': 0, 'content': u'六本木'}
@@ -257,8 +257,9 @@ class TestBudouMethods(unittest.TestCase):
         'dependencyEdge': {'headTokenIndex': 8, 'label': 'P'},
         'partOfSpeech': {'tag': 'PUNCT'},
         'text': {'beginOffset': 17, 'content': u'。'}
-    }])
-    chunks = self.parser._get_source_chunks(
+    }]
+    budou.api.get_annotations = MagicMock(return_value=(tokens, None))
+    chunks, _, _ = self.parser._get_source_chunks(
         u'六本木ヒルズで、「ご飯」を食べます。')
     expected = [
         budou.Chunk(u'六本木', label='NN', pos='NOUN', dependency=None),
