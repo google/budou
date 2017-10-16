@@ -391,7 +391,10 @@ class Budou(object):
           else:
             doc.getchildren()[-1].tail += ' '
         else:
-          pass
+          if doc.text is not None:
+            # We want to preserve space in cases like "Hello 你好"
+            # But the space in " 你好" can be discard.
+            doc.text += ' '
       else:
         if chunk.has_cjk():
           ele = lxml.etree.Element('span')
