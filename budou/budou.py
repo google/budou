@@ -43,7 +43,6 @@ class Chunk(object):
         previous word. (bool or None)
   """
   SPACE_POS = 'SPACE'
-  HTML_POS = 'HTML'
   DEPENDENT_LABEL = (
       'P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'MWV', 'AUXPASS', 'AUXVV', 'RDROP',
       'NUMBER', 'NUM')
@@ -65,20 +64,9 @@ class Chunk(object):
     chunk = cls(u' ', cls.SPACE_POS)
     return chunk
 
-  @classmethod
-  def html(cls, html_code):
-    """Creates HTML Chunk."""
-    chunk = cls(html_code, cls.HTML_POS)
-    return chunk
-
   def is_space(self):
     """Checks if this is space Chunk."""
     return self.pos == self.SPACE_POS
-
-  def update_as_html(self, word):
-    """Updates the chunk as HTML chunk with the given word."""
-    self.word = word
-    self.pos = self.HTML_POS
 
   def update_word(self, word):
     """Updates the word of the chunk."""
