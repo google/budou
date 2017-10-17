@@ -21,7 +21,7 @@ from . import api, cachefactory
 import collections
 import google.auth
 from googleapiclient import discovery
-import lxml.etree
+from xml.etree import ElementTree as ET
 from lxml.html.clean import clean_html
 import re
 import six
@@ -379,7 +379,7 @@ class Budou(object):
     Returns:
       The organized HTML code. (str)
     """
-    doc = lxml.etree.Element('span')
+    doc = ET.Element('span')
     for chunk in chunks:
       if chunk.is_space():
         if doc.getchildren():
@@ -394,7 +394,7 @@ class Budou(object):
             doc.text += ' '
       else:
         if chunk.has_cjk():
-          ele = lxml.etree.Element('span')
+          ele = ET.Element('span')
           ele.text = chunk.word
           for k, v in attributes.items():
             ele.attrib[k] = v
@@ -412,8 +412,7 @@ class Budou(object):
               doc.text = chunk.word
             else:
               doc.text += chunk.word
-    result = lxml.etree.tostring(
-        doc, pretty_print=False, encoding='utf-8').decode('utf-8')
+    result = ET.tostring(doc, encoding='utf-8').decode('utf-8')
     result = clean_html(result)
     return result
 
