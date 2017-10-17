@@ -22,7 +22,7 @@ import collections
 import google.auth
 from googleapiclient import discovery
 from xml.etree import ElementTree as ET
-from lxml.html.clean import clean_html
+import html5lib
 import re
 import six
 import unicodedata
@@ -413,7 +413,9 @@ class Budou(object):
             else:
               doc.text += chunk.word
     result = ET.tostring(doc, encoding='utf-8').decode('utf-8')
-    result = clean_html(result)
+    result = html5lib.serialize(
+        html5lib.parseFragment(result), sanitize=True,
+        quote_attr_values="always")
     return result
 
   def _resolve_dependency(self, chunks):
