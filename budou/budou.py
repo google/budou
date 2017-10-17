@@ -21,8 +21,8 @@ from . import api, cachefactory
 import collections
 import google.auth
 from googleapiclient import discovery
-import lxml.etree
-from lxml.html.clean import clean_html
+from xml.etree import ElementTree as ET
+import html5lib
 import re
 import six
 import unicodedata
@@ -52,10 +52,6 @@ class Chunk(object):
     self.label = label
     self.dependency = dependency
     self._add_dependency_if_punct()
-
-  def __repr__(self):
-    return '<Chunk %s pos: %s, label: %s, dependency: %s>' % (
-        self.word, self.pos, self.label, self.dependency)
 
   @classmethod
   def space(cls):
@@ -383,7 +379,7 @@ class Budou(object):
     Returns:
       The organized HTML code. (str)
     """
-    doc = lxml.etree.Element('span')
+    doc = ET.Element('span')
     for chunk in chunks:
       if chunk.is_space():
         if doc.getchildren():
@@ -398,7 +394,7 @@ class Budou(object):
             doc.text += ' '
       else:
         if chunk.has_cjk():
-          ele = lxml.etree.Element('span')
+          ele = ET.Element('span')
           ele.text = chunk.word
           for k, v in attributes.items():
             ele.attrib[k] = v
@@ -416,9 +412,10 @@ class Budou(object):
               doc.text = chunk.word
             else:
               doc.text += chunk.word
-    result = lxml.etree.tostring(
-        doc, pretty_print=False, encoding='utf-8').decode('utf-8')
-    result = clean_html(result)
+    result = ET.tostring(doc, encoding='utf-8').decode('utf-8')
+    result = html5lib.serialize(
+        html5lib.parseFragment(result), sanitize=True,
+        quote_attr_values="always")
     return result
 
   def _resolve_dependency(self, chunks):
