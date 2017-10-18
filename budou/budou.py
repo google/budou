@@ -193,7 +193,7 @@ class Budou(object):
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
             use_entity=False, classname=None):
-    """Parses input HTML code into word chunks and organized code.
+    """Parses input sentence into word chunks and organized code.
 
     Args:
       source: Text to be processed. (str)
@@ -304,16 +304,15 @@ class Budou(object):
     return attributes
 
   def _preprocess(self, source):
-    """Removes unnecessary break lines and white spaces.
+    """Removes unnecessary line breaks and white spaces.
 
     Args:
-      source: HTML code to be processed. (str)
+      source: String to be processed. (str)
 
     Returns:
-      Preprocessed HTML code. (str)
+      Preprocessed string. (str)
     """
     source = source.replace(u'\n', u'').strip()
-    source = re.sub(r'<br\s*\/?\s*>', u' ', source, re.I)
     source = re.sub(r'\s\s+', u' ', source)
     return source
 

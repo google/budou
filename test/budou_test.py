@@ -206,12 +206,12 @@ class TestBudouMethods(unittest.TestCase):
         'over classname.')
 
   def test_preprocess(self):
-    source = u' a\nb<br> c   d'
+    source = u' a\nb c   d'
     expected = u'ab c d'
     result = self.parser._preprocess(source)
     self.assertEqual(
         expected, result,
-        'BR tags, line breaks, and unnecessary spaces should be removed.')
+        'line breaks and unnecessary spaces should be removed.')
 
   def test_get_source_chunks(self):
     budou.api.get_annotations = MagicMock(
