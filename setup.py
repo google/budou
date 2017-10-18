@@ -21,7 +21,7 @@ def read_file(name):
 
 setup(
     name='budou',
-    version='0.7.2',
+    version='0.7.3',
     author='Shuhei Iitsuka',
     author_email='tushuhei@google.com',
     description='CJK Line Break Organizer',
