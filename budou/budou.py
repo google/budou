@@ -312,8 +312,9 @@ class Budou(object):
     Returns:
       Preprocessed HTML code. (str)
     """
+    doc = html5lib.parseFragment(source)
+    source = ET.tostring(doc, encoding='utf-8', method='text').decode('utf-8')
     source = source.replace(u'\n', u'').strip()
-    source = re.sub(r'<br\s*\/?\s*>', u' ', source, re.I)
     source = re.sub(r'\s\s+', u' ', source)
     return source
 
