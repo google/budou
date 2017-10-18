@@ -113,8 +113,7 @@ class TestBudouMethods(unittest.TestCase):
 
   def setUp(self):
     self.parser = budou.Budou(None)
-    cases_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), 'cases.json')
+    cases_path = os.path.join(os.path.dirname(__file__), 'cases.json')
     with open(cases_path) as f:
       self.cases = json.load(f)
 
@@ -269,7 +268,7 @@ class TestBudouMethods(unittest.TestCase):
         '<span>'
         'Hello '
         u'<span class="foo">今天</span>'
-        u'<span class="foo">天气</span>' 
+        u'<span class="foo">天气</span>'
         u'<span class="foo">很好</span>'
         '</span>')
     result = self.parser._html_serialize(chunks, attributes)
