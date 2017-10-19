@@ -212,6 +212,13 @@ class TestBudouMethods(unittest.TestCase):
         expected, result,
         'BR tags, line breaks, and unnecessary spaces should be removed.')
 
+    source = u'a <script>alert(1)</script> b<div>c</div>'
+    expected = u'a alert(1) bc'
+    result = self.parser._preprocess(source)
+    self.assertEqual(
+        expected, result,
+        'XML tags should be removed.')
+
   def test_get_source_chunks(self):
     budou.api.get_annotations = MagicMock(
         return_value=self.cases['ja-case1']['tokens'])
@@ -275,6 +282,19 @@ class TestBudouMethods(unittest.TestCase):
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
+
+    chunks = budou.ChunkList([
+        budou.Chunk('Hey<'), budou.Chunk('<script>alert(1)</script>'),
+        budou.Chunk('>guys')])
+    attributes = {
+        'class': 'foo'
+    }
+    expected = ('<span>'
+        'Hey&lt;&lt;script&gt;alert(1)&lt;/script&gt;&gt;guys'
+        '</span>')
+    result = self.parser._html_serialize(chunks, attributes)
+    self.assertEqual(
+        result, expected, 'HTML tags included in a chunk should be encoded.')
 
   def test_concatenate_inner(self):
     chunks = budou.ChunkList()
