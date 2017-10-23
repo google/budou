@@ -1,5 +1,6 @@
 # coding: utf-8
 from six.moves import input
+import argparse
 import budou
 import json
 
@@ -16,12 +17,12 @@ def colorize(text, color='green'):
   }
   return colors[color] + text + ENDC
 
-def main():
+def main(credential=None):
   print('Hello, this is an interactive console to add test cases for Budou.')
   print('By following this instruction, new test case will be added and '
         'validated in the future updates.')
   print('Press Ctrl-C to exit.')
-  parser = budou.authenticate()
+  parser = budou.authenticate(json_path=credential)
 
   try:
     while True:
@@ -118,4 +119,12 @@ def add_test_case(source, words, tokens, language):
 
 
 if __name__ == '__main__':
-  main()
+  parser = argparse.ArgumentParser(
+      description='Interactive test case manager for Budou.')
+  parser.add_argument(
+      '--credential',
+      help='Path to service account credential JSON file. If not provided, ' +
+      'default credentials will be used.')
+  args = parser.parse_args()
+  arg_vals = vars(args)
+  main(arg_vals['credential'])
