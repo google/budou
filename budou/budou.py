@@ -43,8 +43,8 @@ class Chunk(object):
   """
   SPACE_POS = 'SPACE'
   DEPENDENT_LABEL = (
-      'P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'MWV', 'AUXPASS', 'AUXVV', 'RDROP',
-      'NUMBER', 'NUM')
+      'P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'AUXPASS', 'RDROP', 'NUMBER', 'NUM',
+      'PREF')
 
   def __init__(self, word, pos=None, label=None, dependency=None):
     self.word = word
