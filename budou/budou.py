@@ -20,6 +20,7 @@ from __future__ import print_function
 from . import api, cachefactory
 import collections
 import google.auth
+import google_auth_httplib2
 from googleapiclient import discovery
 from xml.etree import ElementTree as ET
 import html5lib
@@ -187,8 +188,8 @@ class Budou(object):
               authenticate with default credentials.''')
     else:
       scoped_credentials, project = google.auth.default(scope)
-    service = discovery.build(
-        'language', 'v1beta2', credentials=scoped_credentials)
+    authed_http = google_auth_httplib2.AuthorizedHttp(scoped_credentials)
+    service = discovery.build('language', 'v1beta2', http=authed_http)
     return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
