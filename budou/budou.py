@@ -88,7 +88,8 @@ class Chunk(object):
         'word': self.word,
         'pos': self.pos,
         'label': self.label,
-        'dependency': self.dependency
+        'dependency': self.dependency,
+        'has_cjk': self.has_cjk(),
     }
 
   def maybe_add_dependency(self, default_dependency_direction):
