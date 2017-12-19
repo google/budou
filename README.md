@@ -56,8 +56,8 @@ conditioning each `SPAN` tag with `display: inline-block` in CSS.
 
 ## Supported Language
 - Japanese (ja)
-- Simplified Chinese (zh)
-- Traditional Chinese (zh-Hans)
+- Simplified Chinese (zh-Hans)
+- Traditional Chinese (zh-Hant)
 
 Support for other Asian languages with line break issues, such as
 Thai, will be added as Cloud Natural Language API adds support.
