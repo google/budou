@@ -1,5 +1,9 @@
 # coding: utf-8
+from __future__ import print_function
+from __future__ import unicode_literals
+import six
 from six.moves import input
+from io import open
 import argparse
 import budou
 import json
@@ -26,8 +30,9 @@ def main(credential=None):
 
   try:
     while True:
-      source = input(
-          colorize('Input a source sentence to process: ')).decode('utf-8')
+      source = input(colorize('Input a source sentence to process: '))
+      if isinstance(source, six.binary_type):
+        source = source.decode('utf-8')
       if not source:
         print(colorize('No test case was provided. Try again.', 'red'))
         continue
@@ -35,10 +40,12 @@ def main(credential=None):
         print('Bye.')
         break
       source = source.strip()
+      print()
       print('Your input: %s' % (source))
       result = parser.parse(source, use_cache=False, use_entity=False)
       print(colorize('Retrived chunks from current implementation:', 'blue'))
-      print(DELIMITER.join([chunk['word'] for chunk in result['chunks']]))
+      print(colorize(
+        DELIMITER.join([chunk['word'] for chunk in result['chunks']]), 'blue'))
       is_correct = ask_if_correct()
       if is_correct:
         words = [chunk['word'] for chunk in result['chunks']]
@@ -61,25 +68,30 @@ def ask_if_correct():
       print('Please enter yes or no. (yes/no)')
 
 def ask_expectation(source):
+  print()
   print('Uh-oh. Please input the expected result by separating the sentence '
         'with slashes.')
   print('e.g. %s' % (
         DELIMITER.join([u'これは', u'Google ', u'Home と', u'猫です。'])))
   while True:
-    response = input(colorize('Input expected result: ')).decode('utf-8')
+    response = input(colorize('Input expected result: '))
+    if isinstance(response, six.binary_type):
+      response = response.decode('utf-8')
     if not response:
       print(colorize('No input was provided. Try again.', 'red'))
       continue
     words = response.split(DELIMITER)
     if ''.join(words) != source:
       print(colorize(
-        'The input has different words from source input. Please verify if '
-        'your input matches with the source.', 'red'))
+        'Your input does not match with the characters in the source sentence. '
+        'Please verify if your input has the same characters in the same order '
+        'as the source sentence.', 'red'))
       continue
 
+    print()
     print(colorize('Expected chunks:', 'blue'))
     for word in words:
-      print('word: %s' % (word))
+      print(colorize('word: %s' % (word), 'blue'))
     print('Please enter `yes` if this is correct. Press enter `no` if you want '
           'to edit again.')
     while True:
@@ -92,7 +104,7 @@ def ask_expectation(source):
         print('Please enter `yes` or `no`.')
 
 def add_test_case(source, words, tokens, language):
-  with open(TESTCASES_PATH) as f:
+  with open(TESTCASES_PATH, mode='r', encoding='utf-8') as f:
     cases = [json.loads(row) for row in f.readlines() if row.strip()]
   for case in cases:
     if case['sentence'] == source:
@@ -107,13 +119,15 @@ def add_test_case(source, words, tokens, language):
         return False
       else:
         print('Please enter `yes` or `no`.')
-  with open(TESTCASES_PATH, 'a') as f:
+  with open(TESTCASES_PATH, mode='a', encoding='utf-8') as f:
     f.write(json.dumps({
       'sentence': source,
       'language': language,
       'tokens': tokens,
       'expected': words,
-    }, ensure_ascii=False, sort_keys=True).encode('utf-8') + '\n')
+    }, ensure_ascii=False, sort_keys=True))
+    f.write('\n')
+  print()
   print('Thank you for submission. Your test case "%s" is added.\n\n' % (
       source))
 
