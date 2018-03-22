@@ -43,6 +43,7 @@ class Chunk(object):
         previous word. (bool or None)
   """
   SPACE_POS = 'SPACE'
+  BREAK_POS = 'BREAK'
   DEPENDENT_LABEL = (
       'P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'AUXPASS', 'RDROP', 'NUMBER', 'NUM',
       'PREF')
@@ -54,10 +55,20 @@ class Chunk(object):
     self.dependency = dependency
     self._add_dependency_if_punct()
 
+  def __repr__(self):
+    return 'Chunk(%s, %s, %s, %s)' % (
+        repr(self.word), self.pos, self.label, self.dependency)
+
   @classmethod
   def space(cls):
     """Creates space Chunk."""
     chunk = cls(u' ', cls.SPACE_POS)
+    return chunk
+
+  @classmethod
+  def breakline(cls):
+    """Creates space Chunk."""
+    chunk = cls(u'\n', cls.BREAK_POS)
     return chunk
 
   def is_space(self):
@@ -67,7 +78,8 @@ class Chunk(object):
   def has_cjk(self):
     """Checks if the word of the chunk contains CJK characters
 
-    Using range from https://github.com/nltk/nltk/blob/develop/nltk/tokenize/util.py#L149
+    Using range from
+    https://github.com/nltk/nltk/blob/develop/nltk/tokenize/util.py#L149
     """
     for char in self.word:
       if any([start <= ord(char) <= end for start, end in
@@ -283,6 +295,7 @@ class Budou(object):
       entities = api.get_entities(self.service, input_text, language)
       chunks = self._group_chunks_by_entities(chunks, entities)
     chunks = self._resolve_dependency(chunks)
+    chunks = self._insert_breakline(chunks)
     return chunks, tokens, language
 
   def _get_attribute_dict(self, attributes, classname=None):
@@ -429,6 +442,9 @@ class Budou(object):
 
     Args:
       chunks: a chink list. (ChunkList)
+
+    Returns:
+      A chunk list. (ChunkList)
     """
     chunks = self._concatenate_inner(chunks, True)
     chunks = self._concatenate_inner(chunks, False)
@@ -439,6 +455,9 @@ class Budou(object):
 
     Args:
       direction: Direction of concatenation process. True for forward. (bool)
+
+    Returns:
+      A chunk list. (ChunkList)
     """
     tmp_bucket = []
     source_chunks = chunks if direction else chunks[::-1]
@@ -460,3 +479,23 @@ class Budou(object):
       tmp_bucket = []
     if tmp_bucket: target_chunks += tmp_bucket
     return target_chunks if direction else target_chunks[::-1]
+
+  def _insert_breakline(self, chunks):
+    """Inserts a breakline instead of a trailing space if the chunk is in CJK.
+
+    Args:
+      chunks: a chunk list. (ChunkList)
+
+    Returns:
+      A chunk list. (ChunkList)
+    """
+    target_chunks = ChunkList()
+    for chunk in chunks:
+      if chunk.word[-1] == ' ' and chunk.has_cjk():
+        chunk_to_add = Chunk(
+            chunk.word[:-1], chunk.pos, chunk.label, chunk.dependency)
+        target_chunks.append(chunk_to_add)
+        target_chunks.append(chunk.breakline())
+      else:
+        target_chunks.append(chunk)
+    return target_chunks
