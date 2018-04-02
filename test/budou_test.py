@@ -123,9 +123,10 @@ class TestBudouMethods(unittest.TestCase):
   def test_parse(self):
     for case in self.cases:
       # Mocks external API request.
-      budou.api.get_annotations = MagicMock(return_value=(case['tokens'], None))
+      self.parser._get_annotations = MagicMock(
+          return_value=(case['tokens'], None))
       mock_entities = case['entities'] if 'entities' in case else []
-      budou.api.get_entities = MagicMock(return_value=mock_entities)
+      self.parser._get_entities = MagicMock(return_value=mock_entities)
       source = case['sentence']
       result = self.parser.parse(
           source, language=case['language'], use_cache=False, use_entity=False)
@@ -285,7 +286,7 @@ class TestBudouMethods(unittest.TestCase):
         'partOfSpeech': {'tag': 'PUNCT'},
         'text': {'beginOffset': 17, 'content': u'。'}
     }]
-    budou.api.get_annotations = MagicMock(return_value=(tokens, None))
+    self.parser._get_annotations = MagicMock(return_value=(tokens, None))
     chunks, _, _ = self.parser._get_source_chunks(
         u'六本木ヒルズで、「ご飯」を食べます。')
     expected = [

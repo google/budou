@@ -16,19 +16,17 @@
 
 """Budou, an automatic CJK line break organizer."""
 
-from __future__ import print_function
-from . import api, cachefactory
+from __future__ import print_function, absolute_import
+
+from .cachefactory import load_cache
 import collections
-import google.auth
-import google_auth_httplib2
-from googleapiclient import discovery
 from xml.etree import ElementTree as ET
 import html5lib
 import re
 import six
 import unicodedata
 
-cache = cachefactory.load_cache()
+cache = load_cache()
 
 
 class Chunk(object):
@@ -187,6 +185,8 @@ class Budou(object):
     Returns:
       Budou parser. (Budou)
     """
+    import google_auth_httplib2
+    from googleapiclient import discovery
     scope = ['https://www.googleapis.com/auth/cloud-platform']
     if json_path:
       try:
@@ -200,6 +200,7 @@ class Budou(object):
               please call `authenticate` method with empty argument to
               authenticate with default credentials.''')
     else:
+      import google.auth
       scoped_credentials, project = google.auth.default(scope)
     authed_http = google_auth_httplib2.AuthorizedHttp(scoped_credentials)
     service = discovery.build('language', 'v1beta2', http=authed_http)
@@ -292,7 +293,7 @@ class Budou(object):
     """
     chunks, tokens, language = self._get_source_chunks(input_text, language)
     if use_entity:
-      entities = api.get_entities(self.service, input_text, language)
+      entities = self._get_entities(self.service, input_text, language)
       chunks = self._group_chunks_by_entities(chunks, entities)
     chunks = self._resolve_dependency(chunks)
     chunks = self._insert_breakline(chunks)
@@ -349,7 +350,7 @@ class Budou(object):
     """
     chunks = ChunkList()
     sentence_length = 0
-    tokens, language = api.get_annotations(self.service, input_text, language)
+    tokens, language = self._get_annotations(self.service, input_text, language)
     for i, token in enumerate(tokens):
       word = token['text']['content']
       begin_offset = token['text']['beginOffset']
@@ -499,3 +500,51 @@ class Budou(object):
       else:
         target_chunks.append(chunk)
     return target_chunks
+
+  def _get_annotations(service, text, language='', encoding='UTF32'):
+    """Returns the list of annotations from the given text."""
+    body = {
+        'document': {
+            'type': 'PLAIN_TEXT',
+            'content': text,
+        },
+        'features': {
+            'extract_syntax': True,
+        },
+        'encodingType': encoding,
+    }
+
+    if language:
+      body['document']['language'] = language
+
+    request = service.documents().annotateText(body=body)
+    response = request.execute()
+    tokens = response.get('tokens', [])
+    language = response.get('language')
+    return tokens, language
+
+  def _get_entities(service, text, language='', encoding='UTF32'):
+    """Returns the list of annotations from the given text."""
+    body = {
+        'document': {
+            'type': 'PLAIN_TEXT',
+            'content': text,
+        },
+        'encodingType': encoding,
+    }
+
+    if language:
+      body['document']['language'] = language
+
+    request = service.documents().analyzeEntities(body=body)
+    response = request.execute()
+    result = []
+    for entity in response.get('entities', []):
+      mentions = entity.get('mentions', [])
+      if not mentions: continue
+      entity_text = mentions[0]['text']
+      offset = entity_text['beginOffset']
+      for word in entity_text['content'].split():
+        result.append({'content': word, 'beginOffset': offset})
+        offset += len(word)
+    return result
