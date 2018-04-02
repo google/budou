@@ -14,7 +14,6 @@
 # limitations under the License.
 
 """Package indicator for budou."""
-from __future__ import absolute_import
 from .budou import Budou
 from .budou import Chunk
 from .budou import ChunkList
