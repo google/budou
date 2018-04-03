@@ -293,7 +293,7 @@ class Budou(object):
     """
     chunks, tokens, language = self._get_source_chunks(input_text, language)
     if use_entity:
-      entities = self._get_entities(self.service, input_text, language)
+      entities = self._get_entities(input_text, language)
       chunks = self._group_chunks_by_entities(chunks, entities)
     chunks = self._resolve_dependency(chunks)
     chunks = self._insert_breakline(chunks)
@@ -350,7 +350,7 @@ class Budou(object):
     """
     chunks = ChunkList()
     sentence_length = 0
-    tokens, language = self._get_annotations(self.service, input_text, language)
+    tokens, language = self._get_annotations(input_text, language)
     for i, token in enumerate(tokens):
       word = token['text']['content']
       begin_offset = token['text']['beginOffset']
@@ -501,7 +501,7 @@ class Budou(object):
         target_chunks.append(chunk)
     return target_chunks
 
-  def _get_annotations(service, text, language='', encoding='UTF32'):
+  def _get_annotations(self, text, language='', encoding='UTF32'):
     """Returns the list of annotations from the given text."""
     body = {
         'document': {
@@ -517,13 +517,13 @@ class Budou(object):
     if language:
       body['document']['language'] = language
 
-    request = service.documents().annotateText(body=body)
+    request = self.service.documents().annotateText(body=body)
     response = request.execute()
     tokens = response.get('tokens', [])
     language = response.get('language')
     return tokens, language
 
-  def _get_entities(service, text, language='', encoding='UTF32'):
+  def _get_entities(self, text, language='', encoding='UTF32'):
     """Returns the list of annotations from the given text."""
     body = {
         'document': {
@@ -536,7 +536,7 @@ class Budou(object):
     if language:
       body['document']['language'] = language
 
-    request = service.documents().analyzeEntities(body=body)
+    request = self.service.documents().analyzeEntities(body=body)
     response = request.execute()
     result = []
     for entity in response.get('entities', []):
