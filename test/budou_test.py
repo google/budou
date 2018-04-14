@@ -381,6 +381,20 @@ class TestBudouMethods(unittest.TestCase):
         ['abcdefgh'], [chunk.word for chunk in chunks],
         'Chunks should be concatenated if they depends on the previous word.')
 
+  def test_split_at_max_length(self):
+    max_length = 4
+    chunks = budou.ChunkList()
+    chunks.append(budou.Chunk('abcde', pos="HEAD"))
+    chunks.append(budou.Chunk('fghijklmn', pos="HEAD"))
+
+    chunks = self.parser._split_at_max_length(chunks, max_length)
+    self.assertEqual(
+        ['abcd', 'e', 'fghi', 'jklm', 'n'], [chunk.word for chunk in chunks],
+        'Chunks should be split to be no longer than max length.')
+    self.assertEqual(
+        ['HEAD', 'TAIL', 'HEAD', 'TAIL', 'TAIL'], [chunk.pos for chunk in chunks],
+        'Chunk pos should be TAIL for chunks that were split off.')
+
 
 if __name__ == '__main__':
   unittest.main()
