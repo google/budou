@@ -42,6 +42,7 @@ class Chunk(object):
   """
   SPACE_POS = 'SPACE'
   BREAK_POS = 'BREAK'
+  TAIL_POS = 'TAIL'
   DEPENDENT_LABEL = (
       'P', 'SNUM', 'PRT', 'AUX', 'SUFF', 'AUXPASS', 'RDROP', 'NUMBER', 'NUM',
       'PREF')
@@ -65,8 +66,14 @@ class Chunk(object):
 
   @classmethod
   def breakline(cls):
-    """Creates space Chunk."""
+    """Creates breakline Chunk."""
     chunk = cls(u'\n', cls.BREAK_POS)
+    return chunk
+  
+  @classmethod
+  def tail(cls, tail):
+    """Creates tail Chunk."""
+    chunk = cls(tail, cls.TAIL_POS)
     return chunk
 
   def is_space(self):
@@ -207,7 +214,7 @@ class Budou(object):
     return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
-            use_entity=False, classname=None):
+            max_length=None, use_entity=False, classname=None):
     """Parses input HTML code into word chunks and organized code.
 
     Args:
@@ -219,6 +226,7 @@ class Budou(object):
           is now deprecated. Please use a dictionary to designate attributes.**
       use_cache: Whether to use caching. (bool, optional)
       language: A language used to parse text. (str, optional)
+      max_length: Maximum chunk length. (int, optional)
       use_entity: Whether to use entities Entity Analysis results. Note that it
           makes additional request to API, which may incur additional cost.
           (bool, optional)
@@ -249,7 +257,7 @@ class Budou(object):
       chunks = self._get_chunks_per_space(input_text)
     else:
       chunks, tokens, language = self._get_chunks_with_api(
-          input_text, language, use_entity)
+          input_text, language, max_length, use_entity)
     attributes = self._get_attribute_dict(attributes, classname)
     html_code = self._html_serialize(chunks, attributes)
     result_value = {
@@ -279,12 +287,14 @@ class Budou(object):
         chunks.append(Chunk.space())
     return chunks
 
-  def _get_chunks_with_api(self, input_text, language=None, use_entity=False):
+  def _get_chunks_with_api(self, input_text, language=None, max_length=None,
+                           use_entity=False):
     """Returns a chunk list by using Google Cloud Natural Language API.
 
     Args:
       input_text: String to parse. (str)
       language: A language code. 'ja' and 'ko' are supported. (str, optional)
+      max_length: Maximum chunk length. (int, optional)
       use_entity: Whether to use entities in Natural Language API response.
       (bool, optional)
 
@@ -297,6 +307,8 @@ class Budou(object):
       chunks = self._group_chunks_by_entities(chunks, entities)
     chunks = self._resolve_dependency(chunks)
     chunks = self._insert_breakline(chunks)
+    if max_length:
+      chunks = self._split_at_max_length(chunks, max_length)
     return chunks, tokens, language
 
   def _get_attribute_dict(self, attributes, classname=None):
@@ -499,6 +511,25 @@ class Budou(object):
         target_chunks.append(chunk.breakline())
       else:
         target_chunks.append(chunk)
+    return target_chunks
+
+  def _split_at_max_length(self, chunks, max_length):
+    """Splits chunk up into pieces that are no longer than max_length.
+
+    Args:
+      chunks: A chunk list. (ChunkList)
+      max_length: The maximum chunk length (int)
+
+    Returns:
+      A chunk list. (ChunkList)
+    """
+    target_chunks = ChunkList()
+    for chunk in chunks:
+      words = [chunk.word[i:i + max_length] for i in xrange(0, len(chunk.word), max_length)]
+      # Only use token lable and pos for the head chunk
+      chunks = [Chunk(w, chunk.pos, chunk.label) if i == 0 else Chunk.tail(w) 
+        for i, w in enumerate(words)]
+      target_chunks.extend(chunks)
     return target_chunks
 
   def _get_annotations(self, text, language='', encoding='UTF32'):
