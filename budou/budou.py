@@ -525,7 +525,7 @@ class Budou(object):
     """
     target_chunks = ChunkList()
     for chunk in chunks:
-      words = [chunk.word[i:i + max_length] for i in xrange(0, len(chunk.word), max_length)]
+      words = [chunk.word[i:i + max_length] for i in range(0, len(chunk.word), max_length)]
       # Only use token lable and pos for the head chunk
       chunks = [Chunk(w, chunk.pos, chunk.label) if i == 0 else Chunk.tail(w) 
         for i, w in enumerate(words)]
