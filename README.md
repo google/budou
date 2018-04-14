@@ -147,6 +147,7 @@ result = parser.parse(input_text, {'aria-describedby': element_id}, language='ja
 | use_cache | boolean | `True` | Whether to use caching. |
 | language | str | `None` | Language of the text. If `None` is provided, NL API tries to detect from the input text. |
 | use_entity | boolean | `False` | Whether to use Entity mode. |
+| max_length | int | `None` | Maximum chunk string length. If a chunk is too long it wil be split. |
 
 
 ## Pricing
