@@ -65,7 +65,7 @@ class Chunk(object):
 
   @classmethod
   def breakline(cls):
-    """Creates space Chunk."""
+    """Creates breakline Chunk."""
     chunk = cls(u'\n', cls.BREAK_POS)
     return chunk
 
@@ -207,7 +207,7 @@ class Budou(object):
     return cls(service)
 
   def parse(self, source, attributes=None, use_cache=True, language=None,
-            use_entity=False, classname=None):
+            max_length=None, use_entity=False, classname=None):
     """Parses input HTML code into word chunks and organized code.
 
     Args:
@@ -219,6 +219,7 @@ class Budou(object):
           is now deprecated. Please use a dictionary to designate attributes.**
       use_cache: Whether to use caching. (bool, optional)
       language: A language used to parse text. (str, optional)
+      max_length: Maximum length of span enclosed chunk. (int, optional)
       use_entity: Whether to use entities Entity Analysis results. Note that it
           makes additional request to API, which may incur additional cost.
           (bool, optional)
@@ -251,7 +252,7 @@ class Budou(object):
       chunks, tokens, language = self._get_chunks_with_api(
           input_text, language, use_entity)
     attributes = self._get_attribute_dict(attributes, classname)
-    html_code = self._html_serialize(chunks, attributes)
+    html_code = self._html_serialize(chunks, attributes, max_length)
     result_value = {
         'chunks': [chunk.serialize() for chunk in chunks],
         'html_code': html_code,
@@ -386,7 +387,7 @@ class Budou(object):
       chunks.swap(chunks_to_concat, new_chunk)
     return chunks
 
-  def _html_serialize(self, chunks, attributes):
+  def _html_serialize(self, chunks, attributes, max_length):
     """Returns concatenated HTML code with SPAN tag.
 
     Args:
@@ -395,6 +396,7 @@ class Budou(object):
           attributes of output SPAN tags. If a string, it should be a class name
           of output SPAN tags. If an array, it should be a list of class names
           of output SPAN tags. (str or dict or list of str)
+      max_length: Maximum length of span enclosed chunk. (int, optional)      
 
     Returns:
       The organized HTML code. (str)
@@ -413,7 +415,7 @@ class Budou(object):
             # But the space in " 你好" can be discarded.
             doc.text += ' '
       else:
-        if chunk.has_cjk():
+        if chunk.has_cjk() and not (max_length and len(chunk.word) > max_length):
           ele = ET.Element('span')
           ele.text = chunk.word
           for k, v in attributes.items():

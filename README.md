@@ -109,6 +109,23 @@ result = parser.parse(u'六本木ヒルズでご飯を食べます。', use_cach
 print(result['html_code'])  # => "<span class="ww">六本木ヒルズに</span><span class="ww">います。</span>"
 ```
 
+## Maximum chunk length
+Some words (マルチスクリーン, インフルエンザ, etc) may stand out in certain formats due to their length. For example:
+```
+これが
+マルチスクリーン
+です。
+```
+By using `max_length=6` in conjunction with `display: inline-block` styling on the output SPAN tags this can be avoided:
+```
+これがマルチス
+クリーンです。
+```
+The output would instead look like this.
+```
+<span class="budou">これが</span>マルチスクリーン<span class="budou">です。</span>
+```
+
 ## Accessibility
 Some screen reader software read wrapped chunks one by one when Budou is
 applied, which may degrades user experience for those who need audio support.
@@ -147,6 +164,7 @@ result = parser.parse(input_text, {'aria-describedby': element_id}, language='ja
 | use_cache | boolean | `True` | Whether to use caching. |
 | language | str | `None` | Language of the text. If `None` is provided, NL API tries to detect from the input text. |
 | use_entity | boolean | `False` | Whether to use Entity mode. |
+| max_length | int | `None` | Maximum chunk length. If a chunk is longer than this it will not be wrapped in a SPAN tag. |
 
 
 ## Pricing

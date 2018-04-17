@@ -344,7 +344,7 @@ class TestBudouMethods(unittest.TestCase):
         u'<span class="foo">天气</span>'
         u'<span class="foo">很好</span>'
         '</span>')
-    result = self.parser._html_serialize(chunks, attributes)
+    result = self.parser._html_serialize(chunks, attributes, None)
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
@@ -358,9 +358,26 @@ class TestBudouMethods(unittest.TestCase):
     expected = ('<span>'
         'Hey&lt;&lt;script&gt;alert(1)&lt;/script&gt;&gt;guys'
         '</span>')
-    result = self.parser._html_serialize(chunks, attributes)
+    result = self.parser._html_serialize(chunks, attributes, None)
     self.assertEqual(
         result, expected, 'HTML tags included in a chunk should be encoded.')
+
+    chunks = budou.ChunkList([
+        budou.Chunk(u'去年'), budou.Chunk(u'インフルエンザに'),
+        budou.Chunk(u'かかった。')])
+    attributes = {
+        'class': 'foo'
+    }
+    expected = (
+        '<span>'
+        u'<span class="foo">去年</span>'
+        u'インフルエンザに'
+        u'<span class="foo">かかった。</span>'
+        '</span>')
+    result = self.parser._html_serialize(chunks, attributes, 6)
+    self.assertEqual(
+        result, expected,
+        'Chunks that exceed the max length should not be enclosed by a span.')
 
   def test_concatenate_inner(self):
     chunks = budou.ChunkList()
