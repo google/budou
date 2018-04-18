@@ -16,14 +16,15 @@
 from abc import ABCMeta, abstractmethod
 import hashlib
 import six
-import shelve
+import pickle
+import os
 
 
 def load_cache():
   try:
     from google.appengine.api import memcache
   except:
-    return ShelveCache()
+    return PickleCache()
   else:
     return AppEngineCache(memcache)
 
@@ -32,7 +33,7 @@ def load_cache():
 class BudouCache(object):
 
   CACHE_SALT = '2017-04-13'
-  DEFAULT_FILE_PATH = './budou-cache.shelve'
+  DEFAULT_FILE_PATH = './budou-cache.pickle'
 
   def __repr__(self):
     return '<%s>' % (self.__class__.__name__)
@@ -51,23 +52,33 @@ class BudouCache(object):
     return hashlib.md5(key_source.encode('utf8')).hexdigest()
 
 
-class ShelveCache(BudouCache):
+class PickleCache(BudouCache):
 
   def __init__(self, filepath = None):
     self.filepath = filepath if filepath else self.DEFAULT_FILE_PATH
 
   def get(self, source, language):
-    cache_shelve = shelve.open(self.filepath)
-    cache_key = self._get_cache_key(source, language)
-    result_value = cache_shelve.get(cache_key, None)
-    cache_shelve.close()
-    return result_value
+    self._create_file_if_none_exists()
+    with open(self.filepath, 'rb') as file_object:
+      cache_pickle = pickle.load(file_object)
+      cache_key = self._get_cache_key(source, language)
+      result_value = cache_pickle[cache_key]
+      return result_value
 
   def set(self, source, language, value):
-    cache_shelve = shelve.open(self.filepath)
-    cache_key = self._get_cache_key(source, language)
-    cache_shelve[cache_key] = value
-    cache_shelve.close()
+    self._create_file_if_none_exists()
+    with open(self.filepath, 'r+b') as file_object:
+      cache_pickle = pickle.load(file_object)
+      cache_key = self._get_cache_key(source, language)
+      cache_pickle[cache_key] = value
+      file_object.seek(0)
+      pickle.dump(cache_pickle, file_object)
+
+  def _create_file_if_none_exists(self):
+    if os.path.exists(self.filepath):
+      return
+    with open(self.filepath, 'wb') as file_object:
+      pickle.dump({}, file_object)
 
 
 class AppEngineCache(BudouCache):

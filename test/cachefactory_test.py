@@ -30,21 +30,16 @@ class TestStandardCacheFactory(unittest.TestCase):
 
   def test_load(self):
     cache_type = repr(self.cache)
-    self.assertEqual('<ShelveCache>', cache_type,
-        'ShelveCache should be loaded under standard environment.')
+    self.assertEqual('<PickleCache>', cache_type,
+        'PickleCache should be loaded under standard environment.')
 
   def test_set_and_get(self):
     source = 'apple'
     language = 'a'
     target = 'banana'
     self.cache.set(source, language, target)
-
-
-    # Removing this test because shelve module can put a different extra suffix
-    # by low-level library.
-    # TODO (tushuhei) Update the cache mechanism to use pickle instead.
-    #self.assertTrue(os.path.isfile(self.cache.DEFAULT_FILE_PATH),
-    #    'Cache file should be generated.')
+    self.assertTrue(os.path.isfile(self.cache.DEFAULT_FILE_PATH),
+        'Cache file should be generated.')
     self.assertEqual(self.cache.get(source, language), target,
         'The target should be cached.')
 

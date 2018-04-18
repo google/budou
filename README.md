@@ -78,7 +78,7 @@ API and make the processing faster. If you want to force refresh the cache,
 put `use_cache=False`.
 
 In a standard environment, Budou will create a cache file with
-[python shelve](https://docs.python.org/3/library/shelve.html) format.
+[python pickle](https://docs.python.org/3/library/pickle.html) format.
 
 In [Google App Engine Python Standard Environment](https://cloud.google.com/appengine/docs/standard/python/),
 Budou will use [memcache](https://cloud.google.com/appengine/docs/standard/python/memcache/)
