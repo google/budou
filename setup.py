@@ -21,7 +21,7 @@ def read_file(name):
 
 setup(
     name='budou',
-    version='0.8.8',
+    version='0.8.10',
     author='Shuhei Iitsuka',
     author_email='tushuhei@google.com',
     description='CJK Line Break Organizer',
@@ -33,6 +33,8 @@ setup(
     scripts=[
         'budou/budou.py',
     ],
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     test_suite='test',
     classifiers=[
         'Development Status :: 3 - Alpha',
