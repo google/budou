@@ -1,6 +1,8 @@
 language: python
 
-# Cache our Gcloud SDK between commands
+sudo: required
+
+# Cache gcloud SDK
 cache:
   directories:
     - "$HOME/google-cloud-sdk/"
@@ -13,9 +15,11 @@ python:
 - "2.7"
 - "3.4"
 - "3.5"
+- "3.6"
 
 install:
 - pip install setuptools
+- make install-mecab
 
 script:
 - python setup.py test
@@ -29,5 +33,5 @@ script:
   fi
 - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
     pip install -t lib -r requirements.txt;
-    python gae_test_runner.py ${GAE_PYTHONPATH} --test-path=test_gae;
+    python gae_test_runner.py ${GAE_PYTHONPATH} --test-path=tests_gae --test-pattern=test_*.py;
   fi

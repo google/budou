@@ -7,3 +7,5 @@ budou.egg-info/
 .eggs/
 *.db
 budou-cache.pickle
+.pytest_cache
+docs/_build
