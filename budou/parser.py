@@ -42,7 +42,7 @@ import html5lib
 from .nlapisegmenter import NLAPISegmenter
 from .mecabsegmenter import MecabSegmenter
 
-DEFAULT_CLASS_NAME = 'chunk'
+DEFAULT_CLASS_NAME = 'ww'
 
 @six.add_metaclass(ABCMeta)
 class Parser:

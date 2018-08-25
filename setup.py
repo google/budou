@@ -37,7 +37,7 @@ setup(
     packages=['budou'],
     install_requires=read_file('requirements.txt').splitlines(),
     tests_require=['mock'],
-    long_description=read_file('README.md'),
+    long_description=read_file('README.rst'),
     long_description_content_type='text/markdown',
     test_suite='tests',
     classifiers=[
