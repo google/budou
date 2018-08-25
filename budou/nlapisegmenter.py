@@ -65,8 +65,7 @@ def _memorize(func):
   def _wrapper(self, *args, **kwargs):
     """Wrapper to cache the function's output.
     """
-    use_cache = kwargs.get('use_cache', True)
-    if use_cache:
+    if self.use_cache:
       cache = load_cache(self.cache_filename)
       original_key = ':'.join([
           self.__class__.__name__,
@@ -78,7 +77,7 @@ def _memorize(func):
       if cached_val:
         return cached_val
     val = func(self, *args, **kwargs)
-    if use_cache:
+    if self.use_cache:
       cache.set(cache_key, val)
     return val
   return _wrapper
@@ -101,6 +100,9 @@ class NLAPISegmenter(Segmenter):
       credentials_path (:obj:`str`, optional): File path to the service
           account's credentials file. If no file path is specified, it tries
           to authenticate with default credentials.
+      use_entity (:obj:`bool`, optional): Whether to use entity analysis
+          results to wrap entity names in the output.
+      use_cache (:obj:`bool`, optional): Whether to use a cache system.
       debug (:obj:`bool`, optional): If True, the module does not run
           authentication and `service` remains `None`. This is useful when you
           want to test the module without interacting with the API.
@@ -108,12 +110,15 @@ class NLAPISegmenter(Segmenter):
 
   supported_languages = {'ja', 'ko', 'zh', 'zh-TW', 'zh-CN', 'zh-HK'}
 
-  def __init__(self, cache_filename=None, credentials_path=None, debug=False):
+  def __init__(self, cache_filename, credentials_path, use_entity, use_cache,
+               debug):
 
     import google_auth_httplib2
     import googleapiclient.discovery
 
     self.cache_filename = cache_filename
+    self.use_entity = use_entity
+    self.use_cache = use_cache
 
     if debug:
       self.service = None
@@ -140,15 +145,12 @@ class NLAPISegmenter(Segmenter):
         'language', 'v1beta2', http=authed_http)
     self.service = service
 
-  def segment(self, source, language=None, use_entity=False,
-              use_cache=True):
+  def segment(self, source, language=None):
     """Returns a chunk list from the given sentence.
 
     Args:
       source (str): Source string to segment.
       language (:obj:`str`, optional): A language code.
-      use_entity (:obj:`bool`, optional): Whether to use entity analysis
-          results to wrap entity names in the output.
 
     Returns:
       A chunk list. (:obj:`budou.chunk.ChunkList`)
@@ -161,16 +163,14 @@ class NLAPISegmenter(Segmenter):
       raise ValueError(
           'Language {} is not supported by NLAPI segmenter'.format(language))
 
-    chunks, language = self._get_source_chunks(
-        source, language=language, use_cache=use_cache)
-    if use_entity:
-      entities = self._get_entities(
-          source, language=language, use_cache=use_cache)
+    chunks, language = self._get_source_chunks(source, language=language)
+    if self.use_entity:
+      entities = self._get_entities(source, language=language)
       chunks = self._group_chunks_by_entities(chunks, entities)
     chunks.resolve_dependencies()
     return chunks
 
-  def _get_source_chunks(self, input_text, language=None, use_cache=True):
+  def _get_source_chunks(self, input_text, language=None):
     """Returns a chunk list retrieved from Syntax Analysis results.
 
     Args:
@@ -182,8 +182,7 @@ class NLAPISegmenter(Segmenter):
     """
     chunks = ChunkList()
     seek = 0
-    result = self._get_annotations(
-        input_text, language=language, use_cache=use_cache)
+    result = self._get_annotations(input_text, language=language)
     tokens = result['tokens']
     language = result['language']
     for i, token in enumerate(tokens):
@@ -225,13 +224,12 @@ class NLAPISegmenter(Segmenter):
     return chunks
 
   @_memorize
-  def _get_annotations(self, text, language='', use_cache=True):
+  def _get_annotations(self, text, language=''):
     """Returns the list of annotations retrieved from the given text.
 
     Args:
       text (str): Input text.
       language (:obj:`str`, optional): Language code.
-      use_cache (:obj:`bool`, optional): Whether to use a cache system.
 
     Returns:
       Results in a dictionary. :code:`tokens` contains the list of annotations
@@ -258,13 +256,12 @@ class NLAPISegmenter(Segmenter):
     return {'tokens': tokens, 'language': language}
 
   @_memorize
-  def _get_entities(self, text, language='', use_cache=True):
+  def _get_entities(self, text, language=''):
     """Returns the list of entities retrieved from the given text.
 
     Args:
       text (str): Input text.
       language (:obj:`str`, optional): Language code.
-      use_cache (:obj:`bool`, optional): Whether to use a cache system.
 
     Returns:
       List of entities.

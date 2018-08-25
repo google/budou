@@ -48,22 +48,22 @@ DEFAULT_CLASS_NAME = 'chunk'
 class Parser:
   """Abstract parser class:
 
-  Args:
+  Attributes:
     segmenter(:obj:`budou.segmenter.Segmenter`): Segmenter module.
   """
 
   def __init__(self):
     self.segmenter = None
 
-  def parse(self, source, attributes=None, language=None, max_length=None,
-            classname=None):
+  def parse(self, source, language=None, classname=None, max_length=None,
+            attributes=None):
     """Parses the source sentence to output organized HTML code.
 
     Args:
       source (str): Source sentence to process.
-      attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
       language (:obj:`str`, optional): Language code.
       max_length (:obj:`int`, optional): Maximum length of a chunk.
+      attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
 
     Returns:
       A dictionary containing :code:`chunks` (:obj:`budou.chunk.ChunkList`)
@@ -84,20 +84,21 @@ class NLAPIParser(Parser):
   (:obj:`budou.nlapisegmenter.NLAPISegmenter`).
 
   Args:
-    options (dict, optional): Optional settings. :code:`cache_filename` is for
-      the file path to the cache file. :code:`credentials_path` is for the file
-      path to the service account's credentials file.
+    cache_filename (:obj:`string`, optional): the path to the cache file.
+    credentials_path (:obj:`string`, optional): the path to the service
+        account's credentials file.
 
   Attributes:
     segmenter(:obj:`budou.nlapisegmenter.NLAPISegmenter`): Segmenter module.
   """
 
-  def __init__(self, options=None):
-    if options is None:
-      options = {}
+  def __init__(self, **options):
     self.segmenter = NLAPISegmenter(
         cache_filename=options.get('cache_filename', None),
-        credentials_path=options.get('credentials_path', None))
+        credentials_path=options.get('credentials_path', None),
+        use_entity=options.get('use_entity', False),
+        use_cache=options.get('use_cache', True),
+        debug=options.get('debug', False))
 
 
 class MecabParser(Parser):
@@ -112,25 +113,21 @@ class MecabParser(Parser):
     self.segmenter = MecabSegmenter()
 
 
-def get_parser(segmenter, options=None):
+def get_parser(segmenter, **options):
   """Gets a parser.
 
   Args:
     segmenter (str): Segmenter to use.
-    language (:obj:`str`, optional): Language code.
-    classname (:obj:`str`, optional): Class name of output SPAN tags.
-    options (:obj:`dict`, optional): Optional settings to pass to the segmenter.
+    options (:obj:`dict`, optional): Optional settings.
 
   Returns:
-    Results in a dict. :code:`chunks` holds a list of chunks
-    (:obj:`budou.chunk.ChunkList`) and :code:`html_code` holds the output HTML
-    code.
+    Parser (:obj:`budou.parser.Parser`)
 
   Raises:
     ValueError: If unsupported segmenter is specified.
   """
   if segmenter == 'nlapi':
-    return NLAPIParser(options=options)
+    return NLAPIParser(**options)
   elif segmenter == 'mecab':
     return MecabParser()
   else:

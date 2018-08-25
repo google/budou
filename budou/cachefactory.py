@@ -98,14 +98,11 @@ class PickleCache(BudouCache):
 
     Returns: Retrieved value.
     """
-    if not os.path.exists(self.filename):
-      return None
-    with open(self.filename, 'rb') as cache_file:
-      try:
-        cache_pickle = pickle.load(cache_file)
-      except EOFError:
-        cache_pickle = {}
-      return cache_pickle.get(key, None)
+    self._create_file_if_none_exists()
+    with open(self.filename, 'rb') as file_object:
+      cache_pickle = pickle.load(file_object)
+      val = cache_pickle.get(key, None)
+      return val
 
   def set(self, key, val):
     """Sets a value in a key.
@@ -117,14 +114,18 @@ class PickleCache(BudouCache):
     Returns:
       Retrieved value.
     """
-    with open(self.filename, 'w+b') as cache_file:
-      try:
-        cache_pickle = pickle.load(cache_file)
-      except EOFError:
-        cache_pickle = {}
+    self._create_file_if_none_exists()
+    with open(self.filename, 'r+b') as file_object:
+      cache_pickle = pickle.load(file_object)
       cache_pickle[key] = val
-      cache_file.seek(0)
-      pickle.dump(cache_pickle, cache_file)
+      file_object.seek(0)
+      pickle.dump(cache_pickle, file_object)
+
+  def _create_file_if_none_exists(self):
+    if os.path.exists(self.filename):
+      return
+    with open(self.filename, 'wb') as file_object:
+      pickle.dump({}, file_object)
 
 
 class AppEngineMemcache(BudouCache):

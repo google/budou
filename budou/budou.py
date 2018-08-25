@@ -61,24 +61,27 @@ def main():
   print(result['html_code'])
   sys.exit()
 
-def parse(source, segmenter='nlapi', language=None, classname=None,
-          options=None):
+def parse(source, segmenter='nlapi', language=None, max_length=None,
+          classname=None, attributes=None, **kwargs):
   """Parses input source.
 
   Args:
     source (str): Input source to process.
     segmenter (:obj:`str`, optional): Segmenter to use [default: nlapi].
     language (:obj:`str`, optional): Language code.
+    max_length (:obj:`int`, optional): Maximum length of a chunk.
     classname (:obj:`str`, optional): Class name of output SPAN tags.
-    options (:obj:`dict`, optional): Optional settings to pass to the segmenter.
+    attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
 
   Returns:
     Results in a dict. :code:`chunks` holds a list of chunks
     (:obj:`budou.chunk.ChunkList`) and :code:`html_code` holds the output HTML
     code.
   """
-  parser = get_parser(segmenter, options=options)
-  return parser.parse(source, language=language, classname=classname)
+  parser = get_parser(segmenter, **kwargs)
+  return parser.parse(
+      source, language=language, max_length=max_length, classname=classname,
+      attributes=attributes)
 
 def authenticate(json_path=None):
   """Gets a Natural Language API parser by authenticating the API.
@@ -97,8 +100,7 @@ def authenticate(json_path=None):
   msg = ('budou.authentication() is deprecated. '
          'Please use budou.get_parser() to obtain a parser instead.')
   warnings.warn(msg, DeprecationWarning)
-  options = {'credentials_path': json_path}
-  parser = get_parser('nlpapi', options=options)
+  parser = get_parser('nlpapi', options={'credentials_path': json_path})
   return parser
 
 if __name__ == '__main__':

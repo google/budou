@@ -25,7 +25,12 @@ CASES_PATH = 'cases.ndjson'
 class TestNLAPISegmenter(unittest.TestCase):
 
   def setUp(self):
-    self.segmenter = budou.nlapisegmenter.NLAPISegmenter(debug=True)
+    self.segmenter_no_entities = budou.nlapisegmenter.NLAPISegmenter(
+        cache_filename=None, credentials_path=None, use_cache=False,
+        use_entity=False, debug=True)
+    self.segmenter_use_entities = budou.nlapisegmenter.NLAPISegmenter(
+        cache_filename=None, credentials_path=None, use_cache=False,
+        use_entity=True, debug=True)
     cases_path = os.path.join(os.path.dirname(__file__), CASES_PATH)
     with open(cases_path) as f:
       self.cases = [json.loads(row) for row in f.readlines() if row.strip()]
@@ -33,17 +38,23 @@ class TestNLAPISegmenter(unittest.TestCase):
   def test_segment(self):
     for case in self.cases:
       # Mocks external API request.
-      self.segmenter._get_annotations = MagicMock(return_value={
+      self.segmenter_no_entities._get_annotations = MagicMock(return_value={
         'tokens': case['tokens'], 'language': case['language']})
-      self.segmenter._get_entities = MagicMock(return_value=case['entities'])
-      chunks = self.segmenter.segment(
-          case['sentence'], language=case['language'], use_entity=False)
+      self.segmenter_no_entities._get_entities = MagicMock(
+          return_value=case['entities'])
+      chunks = self.segmenter_no_entities.segment(
+          case['sentence'], language=case['language'])
       self.assertEqual(
           case['expected'], [chunk.word for chunk in chunks],
           u'Chunks do not match in a test case (entity off): {source}'.format(
             source=case['sentence']))
-      chunks = self.segmenter.segment(
-          case['sentence'], language=case['language'], use_entity=True)
+
+      self.segmenter_use_entities._get_annotations = MagicMock(return_value={
+        'tokens': case['tokens'], 'language': case['language']})
+      self.segmenter_use_entities._get_entities = MagicMock(
+          return_value=case['entities'])
+      chunks = self.segmenter_use_entities.segment(
+          case['sentence'], language=case['language'])
       self.assertEqual(
           case['expected_with_entity'], [chunk.word for chunk in chunks],
           u'Chunks do not match in a test case (entity on): {source}'.format(
