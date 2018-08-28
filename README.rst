@@ -1,4 +1,4 @@
-🍇Budou🍇
+Budou 🍇
 ===========
 
 .. image:: https://badge.fury.io/py/budou.svg
@@ -76,7 +76,7 @@ The output is:
    <span class="ww">食べに</span><span class="ww">行く。</span></span>
 
 You can also configure the command with optional parameters.
-For example, you can change the backend segmenter to `MeCab <mecab-segmenter>`_ and change the
+For example, you can change the backend segmenter to `MeCab <#mecab-segmenter>`_ and change the
 class name to :code:`wordwrap` by running the command below.
 
 .. code-block:: sh
@@ -96,7 +96,7 @@ Run help command :code:`budou -h` to see other available options.
 Using programmatically
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use :code:`budou.parse` method for handy processing.
+You can use :code:`budou.parse` method in your python scripts.
 
 .. code-block:: python
 
@@ -138,7 +138,7 @@ Currently, the segmenters below are supported.
 .. csv-table::
   :header: Name, Identifier, Supported Languages
 
-  `Google Cloud Natural Language API <#nlapi>`_, nlapi, "Chinese, Japanese, Korean"
+  `Google Cloud Natural Language API <#nlapi-segmenter>`_, nlapi, "Chinese, Japanese, Korean"
   `MeCab <#mecab-segmenter>`_, mecab, "Japanese"
 
 
@@ -150,7 +150,7 @@ For example, you can run :code:`budou` command with MeCab segmenter by passing
 
   $ budou 今日も元気です --segmenter=mecab
 
-You can also pass :code:`segmenter` parameter when you load a parser.
+You can pass :code:`segmenter` parameter when you load a parser otherwise.
 
 .. code-block:: python
 
@@ -162,16 +162,18 @@ If no segmenter is specified, Google Cloud Natural Language API is used as the
 default segmenter.
 
 
-.. _nlapi:
+.. _nlapi-segmenter:
 
 Google Cloud Natural Language API Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Googlee Cloud Natural Language API (NL API) analyzes the input sentence using
+`Googlee Cloud Natural Language API <https://cloud.google.com/natural-language/>`_
+(NL API) analyzes the input sentence using
 machine learning technology. The API can extract not only syntax but also
 entities included in the sentence, which can be used for better quality
-segmentation. Since this is a simple REST API, you don't need to maintain the
-dictionary and can support multiple languages with one single resource.
+segmentation (see more at `Entity mode <#entity-mode>`_). Since this is a simple
+REST API, you don't need to maintain the dictionary and can support multiple
+languages with one single source.
 
 Supported languages
 ++++++++++++++++++++++
@@ -182,7 +184,7 @@ Supported languages
 - Korean (ko)
 
 For those considering to use Budou for Korean sentences, please also refer to
-`korean`_ section.
+`Korean support <#korean>`_ section.
 
 
 Authentication
@@ -210,18 +212,17 @@ parser.
    parser = budou.get_parser(
        'nlapi', credentials_path='/path/to/credentials.json')
 
-Natural Language API segmenter uses *Syntax Analysis* and incurs cost according
-to monthly usage. Google Cloud Natural Language API has free quota to start
-testing the feature at free of cost. Please refer to
-https://cloud.google.com/natural-language/pricing for more detailed pricing
-information.
+NL API segmenter uses *Syntax Analysis* and incurs cost according to monthly
+usage. NL API has free quota to start testing the feature at free of cost.
+Please refer to https://cloud.google.com/natural-language/pricing for more
+detailed pricing information.
 
 Caching system
 ++++++++++++++++
 
-When on Cloud Natural Language API backend, Budou caches responses from the API
-in order to save unnecessary requests to NL API and make the processing faster.
-If you want to force refresh the cache, set :code:`use_cache` as :code:`False`.
+Parsers on NL API segmenter cache responses from the API in order to save
+unnecessary requests to the API and make the processing faster. If you want to
+force refresh the cache, set :code:`use_cache` as :code:`False`.
 
 .. code-block:: python
 
@@ -230,22 +231,27 @@ If you want to force refresh the cache, set :code:`use_cache` as :code:`False`.
 In `Google App Engine Python 2.7 Standard Environment <https://cloud.google.com/appengine/docs/standard/python/>`_,
 Budou tries to use
 `memcache <https://cloud.google.com/appengine/docs/standard/python/memcache/>`_
-service cache the output efficiently across instances.
+service in order to cache the outputs efficiently across instances.
 If not, Budou creates a cache file in
-`python pickle <https://docs.python.org/3/library/pickle.html>`_ format.
+`python pickle <https://docs.python.org/3/library/pickle.html>`_ format in
+your file system.
+
+
+.. _entity-mode:
 
 Entity mode
 ++++++++++++++++++
 
 Default parser only uses results from Syntactic Analysis for parsing, but you
-can also utilize *Entity Analysis* by specifying `use_entity=True`.
+can also utilize results from *Entity Analysis* by specifying `use_entity=True`.
 Entity Analysis will improve the accuracy of parsing for some phrases,
 especially proper nouns, so it is recommended to use if your target sentences
 include a name of an individual person, place, organization etc.
 
 Please note that Entity Analysis will results in additional pricing because it
-requires additional requests to NL API. For more detail about API pricing, please
-refer to https://cloud.google.com/natural-language/pricing for more detail.
+requires additional requests to NL API. For more detail about API pricing,
+please refer to https://cloud.google.com/natural-language/pricing for more
+detail.
 
 .. code-block:: python
 
@@ -253,7 +259,8 @@ refer to https://cloud.google.com/natural-language/pricing for more detail.
   # Without Entity mode (default)
   result = budou.parse('六本木ヒルズでご飯を食べます。', use_entity=False)
   print(result['html_code'])
-  # <span class="ww">六本木</span><span class="ww">ヒルズに</span><span class="ww">います。</span>
+  # <span class="ww">六本木</span><span class="ww">ヒルズに</span>
+  # <span class="ww">います。</span>
 
   # With Entity mode
   result = budou.parse('六本木ヒルズでご飯を食べます。', use_entity=True)
@@ -266,11 +273,11 @@ refer to https://cloud.google.com/natural-language/pricing for more detail.
 MeCab Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-MeCab is an open source text segmentation library for Japanese language.
-MeCab Segmenter does not require any billed API calling unlike Google Cloud
-Natural Language API Segmenter, so you can process the sentences without
-internet connection free. You can also customize the dictionary by building
-your own.
+`MeCab <https://github.com/taku910/mecab>`_ is an open source text segmentation
+library for Japanese language. MeCab Segmenter does not require any billed API
+calling unlike Google Cloud Natural Language API Segmenter, so you can process
+the sentences without internet connection free. You can also customize the
+dictionary by building your own.
 
 Supported languages
 ++++++++++++++++++++++
@@ -308,32 +315,6 @@ and headings assuming split chunks would be more stood out negatively in larger
 typography.
 
 
-Maximum chunk length
------------------------
-
-Some words (マルチスクリーン, インフルエンザ, etc) may stand out in certain
-formats due to their length. For example:
-
-    これが
-
-    マルチスクリーン
-
-    です。
-
-By using :code:`max_length=6` in conjunction with code:`display: inline-block`
-styling on the output :code:`span` tags this can be avoided:
-
-    これがマルチス
-
-    クリーンです。
-
-The output would instead look like this.
-
-.. code-block:: html
-
-   <span class="ww">これが</span>マルチスクリーン<span class="ww">です。</span>
-
-
 Accessibility
 -------------------
 
@@ -352,9 +333,9 @@ combining `aria-describedby` and `aria-label` attribute in the output.
     <span class="ww" aria-describedby="description">いる</span>
   </p>
 
-**This functionality is currently down** due to html5lib sanitizer's behavior which
-strips aria related attributes from the output HTML. The progress on this issue
-is tracked at https://github.com/google/budou/issues/74
+**This functionality is currently down** due to html5lib sanitizer's behavior
+which strips aria related attributes from the output HTML. The progress on this
+issue is tracked at https://github.com/google/budou/issues/74
 
 Author
 ----------
