@@ -64,10 +64,8 @@ The output is:
    <span><span class="ww">渋谷の</span><span class="ww">カレーを</span>
    <span class="ww">食べに</span><span class="ww">行く。</span></span>
 
-You can also configure the command  passing parameters (e.g. backend segmenter,
-class name etc.). If not specified,
-`Google Cloud Natural Language API <https://cloud.google.com/natural-language/>`_
-is used as the backend segmenter.
+You can also configure the command passing parameters (e.g. backend segmenter,
+class name etc.).
 
 .. code-block:: sh
 
@@ -98,8 +96,9 @@ You can use :code:`budou.parse` method for handy processing.
 
 
 You can also make a parser instance to reuse the segmenter backend with the same
-configuration. If you want to integrate Budou into your web framework in a form
-of a custom filter or a build process, this would be the way to go.
+configuration. If you want to integrate Budou into your web development
+framework in a form of a custom filter or a build process, this would be the way
+to go.
 
 .. code-block:: python
 
@@ -129,22 +128,54 @@ Available backend segmenters
 
 You can choose the backend segmenter to use considering your environmental
 needs.
+Currently, the segmenters below are supported.
+
+.. csv-table::
+  :header: Name, Identifier, Supported Languages
+
+  `Google Cloud Natural Language API <https://cloud.google.com/natural-language/>`_, nlapi, "Chinese, Japanese, Korean"
+  `MeCab <https://github.com/taku910/mecab>`_, mecab, "Japanese"
+
+
+Specify the segmenter when you run :code:`budou` command or load a parser.
+For example, you can run :code:`budou` command with MeCab segmenter by passing
+:code:`--segmenter=mecab` parameter like below.
+
+.. code-block:: sh
+
+  $ budou 今日も元気です --segmenter=mecab
+
+You can also pass :code:`segmenter` parameter when you load a parser.
+
+.. code-block:: python
+
+  import budou
+  parser = budou.get_parser(segmenter='mecab')
+  parser.parse('今日も元気です')
+
+If no segmenter is specified, Google Cloud Natural Language API is used as the
+default segmenter.
 
 Google Cloud Natural Language API Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Natural Language API (NL API) analyzes the input sentence using machine learning
-technology. The API can extract not only syntax but also entities included in
-the sentence, which can be used for better quality segmentation. Since this is
-a simple REST API, you don't need to maintain the dictionary and can support
-multiple languages with one single resource.
+Googlee Cloud Natural Language API (NL API) analyzes the input sentence using
+machine learning technology. The API can extract not only syntax but also
+entities included in the sentence, which can be used for better quality
+segmentation. Since this is a simple REST API, you don't need to maintain the
+dictionary and can support multiple languages with one single resource.
 
 Supported languages
 ++++++++++++++++++++++
 
-- Japanese (ja)
 - Simplified Chinese (zh)
 - Traditional Chinese (zh-Hant)
+- Japanese (ja)
+- Korean (ko)
+
+For those considering to use Budou for Korean sentences, please also refer to
+`korean`_ section.
+
 
 Authentication
 +++++++++++++++
@@ -222,13 +253,37 @@ refer to https://cloud.google.com/natural-language/pricing for more detail.
   # <span class="ww">六本木ヒルズに</span><span class="ww">います。</span>
 
 
-Mecab Segmenter
+MeCab Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+MeCab is an open source text segmentation library for Japanese language.
+MeCab Segmenter does not require any billed API calling unlike Google Cloud
+Natural Language API Segmenter, so you can process the sentences without
+internet connection free. You can also customize the dictionary by building
+your own.
 
-Is Korean supported?
------------------------
+Supported languages
+++++++++++++++++++++++
+
+- Japanese
+
+Installation
++++++++++++++++++
+
+You need to have MeCab installed to use MeCab segmenter in Budou.
+You can install MeCab with IPA dictionary by running
+
+.. code-block:: sh
+
+   $ make install-mecab
+
+in the project's home directory after cloning this repository.
+
+
+.. _korean:
+
+Korean support
+-------------------
 
 Korean has spaces between chunks, so you can organize line breaking simply by
 putting `word-break: keep-all` in your CSS. We recommend you to use that
@@ -250,13 +305,16 @@ Some words (マルチスクリーン, インフルエンザ, etc) may stand out 
 formats due to their length. For example:
 
     これが
+
     マルチスクリーン
+
     です。
 
 By using :code:`max_length=6` in conjunction with code:`display: inline-block`
 styling on the output :code:`span` tags this can be avoided:
 
     これがマルチス
+
     クリーンです。
 
 The output would instead look like this.
@@ -275,8 +333,18 @@ You can attach any attribute to the output chunks to enhance accessibility.
 For example, you can make screen readers to read undivided sentences by
 combining `aria-describedby` and `aria-label` attribute in the output.
 
-TODO
+.. code-block:: html
 
+  <p id="description" aria-label="やりたいことのそばにいる">
+    <span class="ww" aria-describedby="description">やりたい</span>
+    <span class="ww" aria-describedby="description">ことの</span>
+    <span class="ww" aria-describedby="description">そばに</span>
+    <span class="ww" aria-describedby="description">いる</span>
+  </p>
+
+This functionality is currently down due to html5lib sanitizer's behavior which
+strips aria related attributes from the output HTML. The progress on this issue
+is tracked at https://github.com/google/budou/issues/74
 
 Author
 ----------
@@ -297,7 +365,7 @@ official Google product.
 License
 -----------
 
-Copyright 2017 Google Inc. All Rights Reserved.
+Copyright 2018 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
