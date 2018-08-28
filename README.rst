@@ -1,5 +1,5 @@
-Budou
-========
+🍇Budou🍇
+===========
 
 .. image:: https://badge.fury.io/py/budou.svg
    :target: https://badge.fury.io/py/budou
@@ -9,7 +9,7 @@ Budou
 
 English uses spacing and hyphenation as cues to allow for beautiful and legible
 line breaks. Certain CJK languages have none of these, and are notoriously more
-difficult.  Breaks occur randomly, usually in the middle of a word.  This is a
+difficult. Breaks occur randomly, usually in the middle of a word. This is a
 long standing issue in typography on web, and results in degradation of
 readability.
 
@@ -37,15 +37,26 @@ with pip:
 How to use
 --------------
 
-Budou outputs a HTML snippet wrapping chunks with :code:`span` tags. Semantic
-chunks in the output HTML will not be split at the end of line by conditioning
-each :code:`span` tag with :code:`display: inline-block` in CSS.
+Budou outputs a HTML snippet wrapping chunks with :code:`span` tags like below.
+
+.. code-block:: html
+
+   <span><span class="ww">常に</span><span class="ww">最新、</span>
+   <span class="ww">最高の</span><span class="ww">モバイル。</span></span>
+
+Semantic chunks in the output HTML will not be split at the end of line by
+conditioning each :code:`span` tag with :code:`display: inline-block` in CSS.
 
 .. code-block:: css
 
-   .chunk {
+   .ww {
      display: inline-block;
    }
+
+By using the output HTML from Budou and above CSS conditioning, the sentence
+on your webpage will be rendered with legible line breaks like shown below.
+
+.. image:: https://raw.githubusercontent.com/wiki/google/budou/images/nexus_example.jpeg
 
 
 Using as a command-line app
@@ -64,8 +75,9 @@ The output is:
    <span><span class="ww">渋谷の</span><span class="ww">カレーを</span>
    <span class="ww">食べに</span><span class="ww">行く。</span></span>
 
-You can also configure the command passing parameters (e.g. backend segmenter,
-class name etc.).
+You can also configure the command with optional parameters.
+For example, you can change the backend segmenter to `MeCab <mecab-segmenter>`_ and change the
+class name to :code:`wordwrap` by running the command below.
 
 .. code-block:: sh
 
@@ -78,7 +90,7 @@ The output is:
    <span><span class="wordwrap">渋谷の</span><span class="wordwrap">カレーを</span>
    <span class="wordwrap">食べに</span><span class="wordwrap">行く。</span></span>
 
-Run help command :code:`budou -h` to see available options.
+Run help command :code:`budou -h` to see other available options.
 
 
 Using programmatically
@@ -117,24 +129,17 @@ to go.
    # 行く。 動詞
 
 
-How it works
---------------
-
-.. image:: https://raw.githubusercontent.com/wiki/google/budou/images/nexus_example.jpeg
-
-
 Available backend segmenters
 ------------------------------
 
-You can choose the backend segmenter to use considering your environmental
-needs.
+You can choose the backend segmenter considering your environmental needs.
 Currently, the segmenters below are supported.
 
 .. csv-table::
   :header: Name, Identifier, Supported Languages
 
-  `Google Cloud Natural Language API <https://cloud.google.com/natural-language/>`_, nlapi, "Chinese, Japanese, Korean"
-  `MeCab <https://github.com/taku910/mecab>`_, mecab, "Japanese"
+  `Google Cloud Natural Language API <#nlapi>`_, nlapi, "Chinese, Japanese, Korean"
+  `MeCab <#mecab-segmenter>`_, mecab, "Japanese"
 
 
 Specify the segmenter when you run :code:`budou` command or load a parser.
@@ -155,6 +160,9 @@ You can also pass :code:`segmenter` parameter when you load a parser.
 
 If no segmenter is specified, Google Cloud Natural Language API is used as the
 default segmenter.
+
+
+.. _nlapi:
 
 Google Cloud Natural Language API Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,6 +261,8 @@ refer to https://cloud.google.com/natural-language/pricing for more detail.
   # <span class="ww">六本木ヒルズに</span><span class="ww">います。</span>
 
 
+.. _mecab-segmenter:
+
 MeCab Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -342,7 +352,7 @@ combining `aria-describedby` and `aria-label` attribute in the output.
     <span class="ww" aria-describedby="description">いる</span>
   </p>
 
-This functionality is currently down due to html5lib sanitizer's behavior which
+**This functionality is currently down** due to html5lib sanitizer's behavior which
 strips aria related attributes from the output HTML. The progress on this issue
 is tracked at https://github.com/google/budou/issues/74
 
