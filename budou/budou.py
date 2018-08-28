@@ -100,7 +100,7 @@ def authenticate(json_path=None):
   msg = ('budou.authentication() is deprecated. '
          'Please use budou.get_parser() to obtain a parser instead.')
   warnings.warn(msg, DeprecationWarning)
-  parser = get_parser('nlpapi', options={'credentials_path': json_path})
+  parser = get_parser('nlapi', options={'credentials_path': json_path})
   return parser
 
 if __name__ == '__main__':

@@ -129,6 +129,14 @@ to go.
    # 行く。 動詞
 
 
+(deprecated) :code:`authenticate` method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:code:`authenticate`, which have been the method to create a parser in the
+previous releases, is now deprecated from this release.
+The method is still available, but it may be removed in a future release.
+
+
 Available backend segmenters
 ------------------------------
 
