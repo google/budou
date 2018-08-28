@@ -97,8 +97,7 @@ class NLAPIParser(Parser):
         cache_filename=options.get('cache_filename', None),
         credentials_path=options.get('credentials_path', None),
         use_entity=options.get('use_entity', False),
-        use_cache=options.get('use_cache', True),
-        debug=options.get('debug', False))
+        use_cache=options.get('use_cache', True))
 
 
 class MecabParser(Parser):

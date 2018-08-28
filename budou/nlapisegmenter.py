@@ -104,33 +104,29 @@ class NLAPISegmenter(Segmenter):
       use_entity (:obj:`bool`, optional): Whether to use entity analysis
           results to wrap entity names in the output.
       use_cache (:obj:`bool`, optional): Whether to use a cache system.
-      debug (:obj:`bool`, optional): If True, the module does not run
-          authentication and `service` remains `None`. This is useful when you
-          want to test the module without interacting with the API.
   """
 
   supported_languages = {'ja', 'ko', 'zh', 'zh-TW', 'zh-CN', 'zh-HK'}
 
-  def __init__(self, cache_filename, credentials_path, use_entity, use_cache,
-               debug):
+  def __init__(self, cache_filename, credentials_path, use_entity, use_cache):
+
+    self.cache_filename = cache_filename
+    self.credentials_path = credentials_path
+    self.use_entity = use_entity
+    self.use_cache = use_cache
+    self._authenticate()
+
+  def _authenticate(self):
 
     import google_auth_httplib2
     import googleapiclient.discovery
 
-    self.cache_filename = cache_filename
-    self.use_entity = use_entity
-    self.use_cache = use_cache
-
-    if debug:
-      self.service = None
-      return
-
     scope = ['https://www.googleapis.com/auth/cloud-platform']
-    if credentials_path:
+    if self.credentials_path:
       try:
         from google.oauth2 import service_account
         credentials = service_account.Credentials.from_service_account_file(
-            credentials_path)
+            self.credentials_path)
         scoped_credentials = credentials.with_scopes(scope)
       except ImportError:
         logging.error('Failed to load google.oauth2.service_account module. '

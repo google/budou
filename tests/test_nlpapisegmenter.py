@@ -25,12 +25,15 @@ CASES_PATH = 'cases.ndjson'
 class TestNLAPISegmenter(unittest.TestCase):
 
   def setUp(self):
+    # Mocking not to trigger API authentication.
+    budou.nlapisegmenter.NLAPISegmenter._authenticate = MagicMock(
+        return_value=None)
     self.segmenter_no_entities = budou.nlapisegmenter.NLAPISegmenter(
         cache_filename=None, credentials_path=None, use_cache=False,
-        use_entity=False, debug=True)
+        use_entity=False)
     self.segmenter_use_entities = budou.nlapisegmenter.NLAPISegmenter(
         cache_filename=None, credentials_path=None, use_cache=False,
-        use_entity=True, debug=True)
+        use_entity=True)
     cases_path = os.path.join(os.path.dirname(__file__), CASES_PATH)
     with open(cases_path) as f:
       self.cases = [json.loads(row) for row in f.readlines() if row.strip()]
