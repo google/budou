@@ -46,6 +46,7 @@ system is chosen to be used based on the environment.
 
 from __future__ import unicode_literals
 from builtins import str
+import logging
 import hashlib
 from .segmenter import Segmenter
 from .cachefactory import load_cache
