@@ -146,7 +146,7 @@ Currently, the segmenters below are supported.
 .. csv-table::
   :header: Name, Identifier, Supported Languages
 
-  `Google Cloud Natural Language API <#nlapi-segmenter>`_, nlapi, "Chinese, Japanese, Korean"
+  `Google Cloud Natural Language API <#google-cloud-natural-language-api-segmenter>`_, nlapi, "Chinese, Japanese, Korean"
   `MeCab <#mecab-segmenter>`_, mecab, "Japanese"
 
 
