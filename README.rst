@@ -115,7 +115,7 @@ to go.
 .. code-block:: python
 
    import budou
-   parser = budou.get_parser(segmenter='mecab')
+   parser = budou.get_parser('mecab')
    results = parser.parse('渋谷のカレーを食べに行く。')
    print(results['html_code'])
    # <span><span class="ww">渋谷の</span><span class="ww">カレーを</span>
@@ -134,7 +134,20 @@ to go.
 
 :code:`authenticate`, which have been the method to create a parser in the
 previous releases, is now deprecated from this release.
+:code:`authenticate` method is now a wrapper of :code:`get_parser` method and
+returns a parser with
+`Google Cloud Natural Language API <#google-cloud-natural-language-api-segmenter>`_
+segmenter backend.
 The method is still available, but it may be removed in a future release.
+
+.. code-block:: python
+
+   import budou
+   parser = budou.authenticate('/path/to/credentials.json')
+
+   # This is equivalent to:
+   parser = budou.get_parser(
+       'nlapi', credentials_path='/path/to/credentials.json')
 
 
 Available backend segmenters
@@ -163,7 +176,7 @@ You can pass :code:`segmenter` parameter when you load a parser otherwise.
 .. code-block:: python
 
   import budou
-  parser = budou.get_parser(segmenter='mecab')
+  parser = budou.get_parser('mecab')
   parser.parse('今日も元気です')
 
 If no segmenter is specified, Google Cloud Natural Language API is used as the
@@ -192,7 +205,7 @@ Supported languages
 - Korean (ko)
 
 For those considering to use Budou for Korean sentences, please also refer to
-`Korean support <#korean>`_ section.
+`Korean support <#korean-support>`_ section.
 
 
 Authentication
