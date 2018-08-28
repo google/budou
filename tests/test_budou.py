@@ -16,10 +16,13 @@
 
 from .context import budou
 import unittest
+from mock import MagicMock
 
 class TestBudou(unittest.TestCase):
 
   def test_authenticate(self):
+    # Mocking __init__ not to trigger API authentication.
+    budou.parser.NLAPIParser.__init__ = MagicMock(return_value=None)
     parser = budou.authenticate()
     self.assertIsInstance(parser, budou.parser.NLAPIParser,
         'authenticate method should generate NLAPI Parser as the default.')
