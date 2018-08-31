@@ -10,7 +10,7 @@ Budou 🍇
 English uses spacing and hyphenation as cues to allow for beautiful and legible
 line breaks. Certain CJK languages have none of these, and are notoriously more
 difficult. Breaks occur randomly, usually in the middle of a word. This is a
-long standing issue in typography on web, and results in degradation of
+long standing issue in typography on the web, and results in degradation of
 readability.
 
 Budou automatically translates CJK sentences into organized HTML code with
@@ -188,7 +188,7 @@ default segmenter.
 Google Cloud Natural Language API Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`Googlee Cloud Natural Language API <https://cloud.google.com/natural-language/>`_
+`Google Cloud Natural Language API <https://cloud.google.com/natural-language/>`_
 (NL API) analyzes the input sentence using
 machine learning technology. The API can extract not only syntax but also
 entities included in the sentence, which can be used for better quality
