@@ -3,3 +3,7 @@ urllib3
 google-auth>=1.0.0
 google-auth-httplib2
 html5lib==1.0b10
+docopt
+six
+future
+chardet

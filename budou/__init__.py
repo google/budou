@@ -14,13 +14,12 @@
 # limitations under the License.
 
 """Package indicator for budou."""
-from .budou import Budou
-from .budou import Chunk
-from .budou import ChunkList
-from .cachefactory import load_cache
+from .budou import parse, authenticate
+from .parser import get_parser
+from .cachefactory import load_cache, AppEngineMemcache
 
-authenticate = Budou.authenticate
-Chunk = Chunk
-ChunkList = ChunkList
-
+parse = parse
+get_parser = get_parser
+authenticate = authenticate
 load_cache = load_cache
+AppEngineMemcache = AppEngineMemcache

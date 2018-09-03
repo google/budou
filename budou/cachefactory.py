@@ -14,83 +14,150 @@
 
 """Budou cache factory class."""
 from abc import ABCMeta, abstractmethod
-import hashlib
-import six
-import pickle
 import os
+import pickle
+import six
 
 
-def load_cache():
+def load_cache(filename=None):
+  """Loads cache system.
+
+  If Google App Engine Standard Environment's memcache is available, this uses
+  memcache as the backend. Otherwise, this uses :obj:`pickle` to cache
+  the outputs in the local file system.
+
+  Args:
+    filename (:obj:`str`, optional): The file path to the cache file. This is
+        used only when :obj:`pickle` is used as the backend.
+  """
   try:
-    from google.appengine.api import memcache
-  except:
-    return PickleCache()
-  else:
-    return AppEngineCache(memcache)
+    return AppEngineMemcache()
+  except ImportError:
+    return PickleCache(filename)
 
 
 @six.add_metaclass(ABCMeta)
-class BudouCache(object):
-
-  CACHE_SALT = '2017-04-13'
-  DEFAULT_FILE_PATH = './budou-cache.pickle'
-
-  def __repr__(self):
-    return '<%s>' % (self.__class__.__name__)
+class BudouCache:
+  """Base class for cache system.
+  """
 
   @abstractmethod
-  def get(self, source, language):
-    pass
+  def get(self, key):
+    """Abstract method: Gets a value by a key.
+
+    Args:
+      key (str): Key to retrieve the value.
+
+    Returns:
+      Retrieved value.
+
+    Raises:
+      NotImplementedError: If it's not implemented.
+    """
+    raise NotImplementedError()
 
   @abstractmethod
-  def set(self, source, language, value):
-    pass
+  def set(self, key, val):
+    """Abstract method: Sets a value in a key.
 
-  def _get_cache_key(self, source, language):
-    """Returns a cache key for the given source and class name."""
-    key_source = u'%s:%s:%s' % (self.CACHE_SALT, source, language)
-    return hashlib.md5(key_source.encode('utf8')).hexdigest()
+    Args:
+      key (str): Key for the value.
+      val: Value to set.
+
+    Returns:
+      Retrieved value.
+
+    Raises:
+      NotImplementedError: If it's not implemented.
+    """
+    raise NotImplementedError()
 
 
 class PickleCache(BudouCache):
+  """Cache system with :obj:`pickle` backend.
 
-  def __init__(self, filepath = None):
-    self.filepath = filepath if filepath else self.DEFAULT_FILE_PATH
+  Args:
+    filename (str): The file path to the cache file.
 
-  def get(self, source, language):
+  Attributes:
+    filename (str): The file path to the cache file.
+  """
+
+  DEFAULT_FILE_NAME = '/tmp/budou-cache.pickle'
+  """ The default path to the cache file.
+  """
+
+  def __init__(self, filename):
+    self.filename = filename if filename else self.DEFAULT_FILE_NAME
+
+  def get(self, key):
+    """Gets a value by a key.
+
+    Args:
+      key (str): Key to retrieve the value.
+
+    Returns: Retrieved value.
+    """
     self._create_file_if_none_exists()
-    with open(self.filepath, 'rb') as file_object:
+    with open(self.filename, 'rb') as file_object:
       cache_pickle = pickle.load(file_object)
-      cache_key = self._get_cache_key(source, language)
-      result_value = cache_pickle[cache_key]
-      return result_value
+      val = cache_pickle.get(key, None)
+      return val
 
-  def set(self, source, language, value):
+  def set(self, key, val):
+    """Sets a value in a key.
+
+    Args:
+      key (str): Key for the value.
+      val: Value to set.
+
+    Returns:
+      Retrieved value.
+    """
     self._create_file_if_none_exists()
-    with open(self.filepath, 'r+b') as file_object:
+    with open(self.filename, 'r+b') as file_object:
       cache_pickle = pickle.load(file_object)
-      cache_key = self._get_cache_key(source, language)
-      cache_pickle[cache_key] = value
+      cache_pickle[key] = val
       file_object.seek(0)
       pickle.dump(cache_pickle, file_object)
 
   def _create_file_if_none_exists(self):
-    if os.path.exists(self.filepath):
+    if os.path.exists(self.filename):
       return
-    with open(self.filepath, 'wb') as file_object:
+    with open(self.filename, 'wb') as file_object:
       pickle.dump({}, file_object)
 
 
-class AppEngineCache(BudouCache):
+class AppEngineMemcache(BudouCache):
+  """Cache system with :obj:`google.appengine.api.memcache` backend.
 
-  def __init__(self, memcache):
+  Attributes:
+    memcache (:obj:`google.appengine.api.memcache`): Memcache service.
+  """
+
+  def __init__(self):
+    from google.appengine.api import memcache
     self.memcache = memcache
 
-  def get(self, source, language):
-    cache_key = self._get_cache_key(source, language)
-    result_value = self.memcache.get(cache_key, None)
-    return result_value
+  def get(self, key):
+    """Gets a value by a key.
 
-  def set(self, source, language, value):
-    cache_key = self._get_cache_key(source, language)
-    self.memcache.set(cache_key, value)
+    Args:
+      key (str): Key to retrieve the value.
+
+    Returns:
+      Retrieved value.
+    """
+    return self.memcache.get(key, None)
+
+  def set(self, key, val):
+    """Sets a value in a key.
+
+    Args:
+      key (str): Key for the value.
+      val: Value to set.
+
+    Returns:
+      Retrieved value.
+    """
+    self.memcache.set(key, val)

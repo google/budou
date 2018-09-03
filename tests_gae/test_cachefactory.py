@@ -17,7 +17,7 @@
 from google.appengine.api import memcache
 from google.appengine.ext import testbed
 from google.appengine.ext import vendor
-vendor.add("lib")
+vendor.add('lib')
 import budou
 import unittest
 
@@ -37,27 +37,18 @@ class TestGAECacheFactory(unittest.TestCase):
     del self.cache
 
   def test_load(self):
-    self.assertEqual('<AppEngineCache>', repr(self.cache),
-        'Under GAE environment, AppEngineCache should be loaded.')
+    self.assertIsInstance(self.cache, budou.AppEngineMemcache,
+        'Under GAE environment, AppEngineMemcache should be used.')
 
   def test_set_and_get(self):
-    source = 'apple'
-    language = 'a'
-    target = 'banana'
-    self.cache.set(source, language, target)
-    self.assertEqual(target, self.cache.get(source, language),
-        'The target should be cached.')
-
-  def test_cache_key(self):
-    self.cache.set('a', 'en', 1)
-    self.cache.set('a', 'ja', 2)
-    self.cache.set('b', 'en', 3)
-    self.assertNotEqual(
-        self.cache.get('a', 'en'), self.cache.get('b', 'en'),
-        'The cached key should be unique per source text.')
-    self.assertNotEqual(
-        self.cache.get('a', 'en'), self.cache.get('a', 'ja'),
-        'The cached key should be unique per language.')
+    key = 'apple'
+    val = 'banana'
+    self.cache.set(key,  val)
+    self.assertEqual(val, self.cache.get(key), 'The target should be cached.')
+    val = 'cinnamon'
+    self.cache.set(key, val)
+    self.assertEqual(
+        val, self.cache.get(key), 'The cached value should be updated.')
 
 if __name__ == '__main__':
   unittest.main()
