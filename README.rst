@@ -280,13 +280,14 @@ detail.
   # Without Entity mode (default)
   result = budou.parse('六本木ヒルズでご飯を食べます。', use_entity=False)
   print(result['html_code'])
-  # <span class="ww">六本木</span><span class="ww">ヒルズに</span>
-  # <span class="ww">います。</span>
+  # <span class="ww">六本木</span><span class="ww">ヒルズで</span>
+  # <span class="ww">ご飯を</span><span class="ww">食べます。</span>
 
   # With Entity mode
   result = budou.parse('六本木ヒルズでご飯を食べます。', use_entity=True)
   print(result['html_code'])
-  # <span class="ww">六本木ヒルズに</span><span class="ww">います。</span>
+  # <span class="ww">六本木ヒルズで</span>
+  # <span class="ww">ご飯を</span><span class="ww">食べます。</span>
 
 
 .. _mecab-segmenter:
