@@ -188,7 +188,7 @@ default segmenter.
 Google Cloud Natural Language API Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`Google Cloud Natural Language API <https://cloud.google.com/natural-language/>`_
+Google Cloud Natural Language API (https://cloud.google.com/natural-language/)
 (NL API) analyzes the input sentence using
 machine learning technology. The API can extract not only syntax but also
 entities included in the sentence, which can be used for better quality
@@ -294,7 +294,7 @@ detail.
 MeCab Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-`MeCab <https://github.com/taku910/mecab>`_ is an open source text segmentation
+MeCab (https://github.com/taku910/mecab) is an open source text segmentation
 library for Japanese language. MeCab Segmenter does not require any billed API
 calling unlike Google Cloud Natural Language API Segmenter, so you can process
 the sentences without internet connection free. You can also customize the
