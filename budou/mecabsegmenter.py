@@ -60,7 +60,7 @@ class MecabSegmenter(Segmenter):
     """Returns a chunk list from the given sentence.
 
     Args:
-      input_text (str): Source string to segment.
+      source (str): Source string to segment.
       language (:obj:`str`, optional): A language code.
 
     Returns:
