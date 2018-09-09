@@ -36,7 +36,7 @@ _DEPENDENT_LABEL_FORWARD = set()
 _DEPENDENT_LABEL_BACKWARD = {u'非自立'}
 
 class MecabSegmenter(Segmenter):
-  """Mecab Segmenter.
+  """MeCab Segmenter.
 
   Attributes:
     tagger (MeCab.Tagger): MeCab Tagger to parse the input sentence.
@@ -60,7 +60,7 @@ class MecabSegmenter(Segmenter):
     """Returns a chunk list from the given sentence.
 
     Args:
-      input_text (str): Source string to segment.
+      source (str): Source string to segment.
       language (:obj:`str`, optional): A language code.
 
     Returns:
@@ -72,7 +72,7 @@ class MecabSegmenter(Segmenter):
     """
     if language and not language in self.supported_languages:
       raise ValueError(
-          'Language {} is not supported by NLAPI segmenter'.format(language))
+          'Language {} is not supported by MeCab segmenter'.format(language))
 
     chunks = ChunkList()
     seek = 0
