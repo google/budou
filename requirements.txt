@@ -7,3 +7,4 @@ docopt
 six
 future
 chardet
+tinysegmenter3
