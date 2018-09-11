@@ -161,6 +161,7 @@ Currently, the segmenters below are supported.
 
   `Google Cloud Natural Language API <#google-cloud-natural-language-api-segmenter>`_, nlapi, "Chinese, Japanese, Korean"
   `MeCab <#mecab-segmenter>`_, mecab, "Japanese"
+  `TinySegmenter<#tiny-segmenter>`_, tinysegmenter, "Japanese"
 
 
 Specify the segmenter when you run :code:`budou` command or load a parser.
@@ -317,6 +318,23 @@ You can install MeCab with IPA dictionary by running
    $ make install-mecab
 
 in the project's home directory after cloning this repository.
+
+
+.. _tiny-segmenter:
+
+TinySegmenter-based Segmenter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TinySegmenter (http://chasen.org/~taku/software/TinySegmenter/) is a compact
+Japanese tokenizer originally created by (c) 2008 Taku Kudo.
+This tokenizes sentences by a combination of pattern matchings carefully
+designed using machine learning. It means **you can use this backend without
+any additional setup!**
+
+Supported languages
+++++++++++++++++++++++
+
+- Japanese
 
 
 .. _korean:
