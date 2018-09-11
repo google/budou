@@ -17,7 +17,7 @@
 from .context import budou
 import unittest
 
-class TestTinysegSegmenter(unittest.TestCase):
+class TestTinysegmenterSegmenter(unittest.TestCase):
 
   def setUp(self):
     self.segmenter = budou.tinysegmentersegmenter.TinysegmenterSegmenter()
