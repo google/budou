@@ -60,10 +60,10 @@ budou.segmenter module
     :undoc-members:
     :show-inheritance:
 
-budou.tinysegsegmenter module
------------------------------
+budou.tinysegmentersegmenter module
+-----------------------------------
 
-.. automodule:: budou.tinysegsegmenter
+.. automodule:: budou.tinysegmentersegmenter
     :members:
     :undoc-members:
     :show-inheritance:
