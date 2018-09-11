@@ -41,7 +41,7 @@ import six
 import html5lib
 from .nlapisegmenter import NLAPISegmenter
 from .mecabsegmenter import MecabSegmenter
-from .tinysegsegmenter import TinysegSegmenter
+from .tinysegmentersegmenter import TinysegmenterSegmenter
 
 DEFAULT_CLASS_NAME = 'ww'
 
@@ -113,16 +113,17 @@ class MecabParser(Parser):
     self.segmenter = MecabSegmenter()
 
 
-class TinysegParser(Parser):
+class TinysegmenterParser(Parser):
   """Parser built on TinySegmenter Segmenter
-  (:obj:`budou.tinysegsegmenter.TinysegSegmenter`).
+  (:obj:`budou.tinysegmentersegmenter.TinysegmenterSegmenter`).
 
   Attributes:
-    segmenter(:obj:`budou.tinysegsegmenter.TinysegSegmenter`): Segmenter module.
+    segmenter(:obj:`budou.tinysegmentersegmenter.TinysegmenterSegmenter`):
+        Segmenter module.
   """
 
   def __init__(self):
-    self.segmenter = TinysegSegmenter()
+    self.segmenter = TinysegmenterSegmenter()
 
 
 def get_parser(segmenter, **options):
@@ -142,8 +143,8 @@ def get_parser(segmenter, **options):
     return NLAPIParser(**options)
   elif segmenter == 'mecab':
     return MecabParser()
-  elif segmenter == 'tiny':
-    return TinysegParser()
+  elif segmenter == 'tinysegmenter':
+    return TinysegmenterParser()
   else:
     raise ValueError('Segmenter {} is not supported.'.format(segmenter))
 

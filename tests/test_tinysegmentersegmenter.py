@@ -20,7 +20,7 @@ import unittest
 class TestTinysegSegmenter(unittest.TestCase):
 
   def setUp(self):
-    self.segmenter = budou.tinysegsegmenter.TinysegSegmenter()
+    self.segmenter = budou.tinysegmentersegmenter.TinysegmenterSegmenter()
 
   def test_segment(self):
     chunks = self.segmenter.segment(u'これは Android です。')

@@ -56,7 +56,7 @@ def is_hiragana(word):
   return len(word) == 1 and 12353 <= ord(word) <= 12447
 
 
-class TinysegSegmenter(Segmenter):
+class TinysegmenterSegmenter(Segmenter):
   """TinySegmenter based Segmenter.
 
   Attributes:
