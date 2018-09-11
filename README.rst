@@ -161,7 +161,7 @@ Currently, the segmenters below are supported.
 
   `Google Cloud Natural Language API <#google-cloud-natural-language-api-segmenter>`_, nlapi, "Chinese, Japanese, Korean"
   `MeCab <#mecab-segmenter>`_, mecab, "Japanese"
-  `TinySegmenter<#tiny-segmenter>`_, tinysegmenter, "Japanese"
+  `TinySegmenter <#tiny-segmenter>`_, tinysegmenter, "Japanese"
 
 
 Specify the segmenter when you run :code:`budou` command or load a parser.
