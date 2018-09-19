@@ -7,20 +7,20 @@ Budou 🍇
 .. image:: https://travis-ci.org/google/budou.svg?branch=master
    :target: https://travis-ci.org/google/budou
 
-English uses spacing and hyphenation as cues to allow for beautiful and legible
-line breaks. Certain CJK languages have none of these, and are notoriously more
-difficult. Breaks occur randomly, usually in the middle of a word. This is a
-long standing issue in typography on the web, and results in degradation of
-readability.
+English text has many clues, like spacing and hyphenation, that enable beautiful
+and legible line breaks. Some CJK languages lack these clues, and so are
+notoriously more difficult to process. Without a more careful approach,
+breaks can occur randomly and usually in the middle of a word. This is a
+long-standing issue with typography on the web and results in a degradation
+of readability.
 
-Budou automatically translates CJK sentences into organized HTML code with
-lexical chunks wrapped in non-breaking markup so as to semantically control line
-breaks. Budou uses word segmenter to analyze the input sentence, and it
-concatenates proper words in order to produce meaningful chunks utilizing
-part-of-speech (pos) tagging and syntactic information. Processed chunks are
-wrapped with :code:`SPAN` tag, so semantic units will no longer be split at
-the end of a line by specifying their :code:`display` property as
-:code:`inline-block` in CSS.
+Budou automatically translates CJK sentences into HTML with
+lexical chunks wrapped in non-breaking markup, so as to semantically control line
+breaks. Budou uses word segmenters to analyze input sentences. It can also
+concatenate proper nouns to produce meaningful chunks utilizing
+part-of-speech (pos) tagging and other syntactic information. Processed chunks are
+wrapped with the :code:`SPAN` tag. These semantic units will no longer be split at
+the end of a line if given a CSS :code:`display` property set to :code:`inline-block`.
 
 
 Installation
@@ -34,10 +34,10 @@ with pip:
    $ pip install budou
 
 
-How to use
+Output
 --------------
 
-Budou outputs a HTML snippet wrapping chunks with :code:`span` tags like below.
+Budou outputs an HTML snippet wrapping chunks with :code:`span` tags:
 
 .. code-block:: html
 
@@ -45,7 +45,7 @@ Budou outputs a HTML snippet wrapping chunks with :code:`span` tags like below.
    <span class="ww">最高の</span><span class="ww">モバイル。</span></span>
 
 Semantic chunks in the output HTML will not be split at the end of line by
-conditioning each :code:`span` tag with :code:`display: inline-block` in CSS.
+configuring each :code:`span` tag with :code:`display: inline-block` in CSS.
 
 .. code-block:: css
 
@@ -53,8 +53,8 @@ conditioning each :code:`span` tag with :code:`display: inline-block` in CSS.
      display: inline-block;
    }
 
-By using the output HTML from Budou and above CSS conditioning, the sentence
-on your webpage will be rendered with legible line breaks like shown below.
+By using the output HTML from Budou and the CSS above, sentences
+on your webpage will be rendered with legible line breaks:
 
 .. image:: https://raw.githubusercontent.com/wiki/google/budou/images/nexus_example.jpeg
 
@@ -62,7 +62,7 @@ on your webpage will be rendered with legible line breaks like shown below.
 Using as a command-line app
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can process your texts by running :code:`budou` command like below.
+You can process your text by running the :code:`budou` command:
 
 .. code-block:: sh
 
@@ -77,7 +77,7 @@ The output is:
 
 You can also configure the command with optional parameters.
 For example, you can change the backend segmenter to `MeCab <#mecab-segmenter>`_ and change the
-class name to :code:`wordwrap` by running the command below.
+class name to :code:`wordwrap` by running:
 
 .. code-block:: sh
 
@@ -90,13 +90,13 @@ The output is:
    <span><span class="wordwrap">渋谷の</span><span class="wordwrap">カレーを</span>
    <span class="wordwrap">食べに</span><span class="wordwrap">行く。</span></span>
 
-Run help command :code:`budou -h` to see other available options.
+Run the help command :code:`budou -h` to see other available options.
 
 
 Using programmatically
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use :code:`budou.parse` method in your python scripts.
+You can use the :code:`budou.parse` method in your Python scripts.
 
 .. code-block:: python
 
@@ -109,7 +109,7 @@ You can use :code:`budou.parse` method in your python scripts.
 
 You can also make a parser instance to reuse the segmenter backend with the same
 configuration. If you want to integrate Budou into your web development
-framework in a form of a custom filter or a build process, this would be the way
+framework in the form of a custom filter or build process, this would be the way
 to go.
 
 .. code-block:: python
@@ -132,10 +132,10 @@ to go.
 (deprecated) :code:`authenticate` method
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:code:`authenticate`, which have been the method to create a parser in the
-previous releases, is now deprecated from this release.
-:code:`authenticate` method is now a wrapper of :code:`get_parser` method and
-returns a parser with
+:code:`authenticate`, which had been the method used to create a parser in
+previous releases, is now deprecated.
+The :code:`authenticate` method is now a wrapper around the :code:`get_parser` method
+that returns a parser with the
 `Google Cloud Natural Language API <#google-cloud-natural-language-api-segmenter>`_
 segmenter backend.
 The method is still available, but it may be removed in a future release.
@@ -150,11 +150,11 @@ The method is still available, but it may be removed in a future release.
        'nlapi', credentials_path='/path/to/credentials.json')
 
 
-Available backend segmenters
+Available segmenter backends
 ------------------------------
 
-You can choose the backend segmenter considering your environmental needs.
-Currently, the segmenters below are supported.
+You can choose different segmenter backends depending on the needs of 
+your environment. Currently, the segmenters below are supported.
 
 .. csv-table::
   :header: Name, Identifier, Supported Languages
@@ -164,15 +164,15 @@ Currently, the segmenters below are supported.
   `TinySegmenter <#tinysegmenter-based-segmenter>`_, tinysegmenter, "Japanese"
 
 
-Specify the segmenter when you run :code:`budou` command or load a parser.
-For example, you can run :code:`budou` command with MeCab segmenter by passing
-:code:`--segmenter=mecab` parameter like below.
+Specify the segmenter when you run the :code:`budou` command or load a parser.
+For example, you can run the :code:`budou` command with the MeCab segmenter by
+passing the :code:`--segmenter=mecab` parameter:
 
 .. code-block:: sh
 
   $ budou 今日も元気です --segmenter=mecab
 
-You can pass :code:`segmenter` parameter when you load a parser otherwise.
+You can pass :code:`segmenter` parameter when you load a parser:
 
 .. code-block:: python
 
@@ -180,8 +180,8 @@ You can pass :code:`segmenter` parameter when you load a parser otherwise.
   parser = budou.get_parser('mecab')
   parser.parse('今日も元気です')
 
-If no segmenter is specified, Google Cloud Natural Language API is used as the
-default segmenter.
+If no segmenter is specified, the Google Cloud Natural Language API is used as
+the default.
 
 
 .. _nlapi-segmenter:
@@ -189,13 +189,13 @@ default segmenter.
 Google Cloud Natural Language API Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Google Cloud Natural Language API (https://cloud.google.com/natural-language/)
-(NL API) analyzes the input sentence using
+The Google Cloud Natural Language API (https://cloud.google.com/natural-language/)
+(NL API) analyzes input sentences using
 machine learning technology. The API can extract not only syntax but also
 entities included in the sentence, which can be used for better quality
 segmentation (see more at `Entity mode <#entity-mode>`_). Since this is a simple
-REST API, you don't need to maintain the dictionary and can support multiple
-languages with one single source.
+REST API, you don't need to maintain a dictionary. You can also support multiple
+languages using one single source.
 
 Supported languages
 ++++++++++++++++++++++
@@ -205,22 +205,22 @@ Supported languages
 - Japanese (ja)
 - Korean (ko)
 
-For those considering to use Budou for Korean sentences, please also refer to
-`Korean support <#korean-support>`_ section.
+For those considering using Budou for Korean sentences, please refer to
+the `Korean support <#korean-support>`_ section.
 
 
 Authentication
 +++++++++++++++
 
-NL API requires authentication to use. Firstly, create a Google Cloud Platform
-project and enable Cloud Natural Language API. Billing also need to be enabled
+The NL API requires authentication before use. First, create a Google Cloud Platform
+project and enable the Cloud Natural Language API. Billing also needs to be enabled
 for the project. Then, download a credentials file for a service account by
-accessing `Google Cloud Console <https://console.cloud.google.com/>`_
+accessing the `Google Cloud Console <https://console.cloud.google.com/>`_
 and navigating through "API & Services" > "Credentials" > "Create credentials" >
 "Service account key" > "JSON".
 
 Budou will handle authentication once the path to the credentials file is set
-as :code:`GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+in the :code:`GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 .. code-block:: sh
 
@@ -234,27 +234,27 @@ parser.
    parser = budou.get_parser(
        'nlapi', credentials_path='/path/to/credentials.json')
 
-NL API segmenter uses *Syntax Analysis* and incurs cost according to monthly
-usage. NL API has free quota to start testing the feature at free of cost.
+The NL API segmenter uses *Syntax Analysis* and incurs costs according to
+monthly usage. The NL API has free quota to start testing the feature without charge.
 Please refer to https://cloud.google.com/natural-language/pricing for more
 detailed pricing information.
 
 Caching system
 ++++++++++++++++
 
-Parsers on NL API segmenter cache responses from the API in order to save
-unnecessary requests to the API and make the processing faster. If you want to
-force refresh the cache, set :code:`use_cache` as :code:`False`.
+Parsers using the NL API segmenter cache responses from the API in order to
+prevent unnecessary requests to the API and to make processing faster. If you want to
+force-refresh the cache, set :code:`use_cache` to :code:`False`.
 
 .. code-block:: python
 
    parser = budou.parse('明日は晴れるかな', segmenter='nlapi', use_cache=False)
 
-In `Google App Engine Python 2.7 Standard Environment <https://cloud.google.com/appengine/docs/standard/python/>`_,
-Budou tries to use
+In the `Google App Engine Python 2.7 Standard Environment <https://cloud.google.com/appengine/docs/standard/python/>`_,
+Budou tries to use the
 `memcache <https://cloud.google.com/appengine/docs/standard/python/memcache/>`_
-service in order to cache the outputs efficiently across instances.
-If not, Budou creates a cache file in
+service to cache output efficiently across instances.
+In other environments, Budou creates a cache file in the
 `python pickle <https://docs.python.org/3/library/pickle.html>`_ format in
 your file system.
 
@@ -264,16 +264,15 @@ your file system.
 Entity mode
 ++++++++++++++++++
 
-Default parser only uses results from Syntactic Analysis for parsing, but you
+The default parser only uses results from Syntactic Analysis for parsing, but you
 can also utilize results from *Entity Analysis* by specifying `use_entity=True`.
 Entity Analysis will improve the accuracy of parsing for some phrases,
-especially proper nouns, so it is recommended to use if your target sentences
-include a name of an individual person, place, organization etc.
+especially proper nouns, so it is recommended if your target sentences
+include names of individual people, places, organizations, and so on.
 
-Please note that Entity Analysis will results in additional pricing because it
-requires additional requests to NL API. For more detail about API pricing,
-please refer to https://cloud.google.com/natural-language/pricing for more
-detail.
+Please note that Entity Analysis will result in additional pricing because it
+requires additional requests to the NL API. For more details about API pricing,
+please refer to https://cloud.google.com/natural-language/pricing.
 
 .. code-block:: python
 
@@ -297,9 +296,9 @@ MeCab Segmenter
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 MeCab (https://github.com/taku910/mecab) is an open source text segmentation
-library for Japanese language. MeCab Segmenter does not require any billed API
-calling unlike Google Cloud Natural Language API Segmenter, so you can process
-the sentences without internet connection free. You can also customize the
+library for the Japanese language. Unlike the Google Cloud Natural Language API segmenter,
+the MeCab segmenter does not require any billed API calls, so you can process
+sentences for free and without an internet connection. You can also customize the
 dictionary by building your own.
 
 Supported languages
@@ -310,8 +309,8 @@ Supported languages
 Installation
 +++++++++++++++++
 
-You need to have MeCab installed to use MeCab segmenter in Budou.
-You can install MeCab with IPA dictionary by running
+You need to have MeCab installed to use the MeCab segmenter in Budou.
+You can install MeCab with an IPA dictionary by running
 
 .. code-block:: sh
 
@@ -327,9 +326,9 @@ TinySegmenter-based Segmenter
 
 TinySegmenter (http://chasen.org/~taku/software/TinySegmenter/) is a compact
 Japanese tokenizer originally created by (c) 2008 Taku Kudo.
-This tokenizes sentences by a combination of pattern matchings carefully
-designed using machine learning. It means **you can use this backend without
-any additional setup!**
+It tokenizes sentences by matching against a combination of patterns carefully
+designed using machine learning. This means that **you can use this backend
+without any additional setup!**
 
 Supported languages
 ++++++++++++++++++++++
@@ -342,27 +341,27 @@ Supported languages
 Korean support
 -------------------
 
-Korean has spaces between chunks, so you can organize line breaking simply by
-putting `word-break: keep-all` in your CSS. We recommend you to use that
+Korean has spaces between chunks, so you can perform line breaking simply by
+putting `word-break: keep-all` in your CSS. We recommend that you use this
 technique instead of using Budou.
 
 
-Where to use
+Use cases
 ---------------
 
 Budou is designed to be used mostly in eye-catching sentences such as titles
-and headings assuming split chunks would be more stood out negatively in larger
-typography.
+and headings on the assumption that split chunks would stand out negatively
+at larger font sizes.
 
 
 Accessibility
 -------------------
 
-Some screen reader software read wrapped chunks one by one when Budou is
-applied, which may degrades user experience for those who need audio support.
+Some screen reader software packages read Budou's wrapped chunks one by one.
+This may degrade the user experience for those who need audio support.
 You can attach any attribute to the output chunks to enhance accessibility.
-For example, you can make screen readers to read undivided sentences by
-combining `aria-describedby` and `aria-label` attribute in the output.
+For example, you can make screen readers read undivided sentences by
+combining the `aria-describedby` and `aria-label` attributes in the output.
 
 .. code-block:: html
 
@@ -373,8 +372,8 @@ combining `aria-describedby` and `aria-label` attribute in the output.
     <span class="ww" aria-describedby="description">いる</span>
   </p>
 
-**This functionality is currently down** due to html5lib sanitizer's behavior
-which strips aria related attributes from the output HTML. The progress on this
+**This functionality is currently nonfunctional** due to the html5lib sanitizer's
+behavior, which strips ARIA-related attributes from the output HTML. Progress on this
 issue is tracked at https://github.com/google/budou/issues/74
 
 Author
