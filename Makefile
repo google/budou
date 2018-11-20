@@ -23,7 +23,7 @@ install-mecab:
 	make; \
 	sudo make install; \
 	mecab --version; \
-	pip install mecab-python3
+	pip install 'mecab-python3==0.7'
 
 doc:
 	make init-dev; \
