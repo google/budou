@@ -106,7 +106,7 @@ class NLAPISegmenter(Segmenter):
       use_cache (:obj:`bool`, optional): Whether to use a cache system.
   """
 
-  supported_languages = {'ja', 'ko', 'zh', 'zh-TW', 'zh-CN', 'zh-HK'}
+  supported_languages = {'ja', 'ko', 'zh', 'zh-TW', 'zh-CN', 'zh-HK', 'zh-Hant'}
 
   def __init__(self, cache_filename, credentials_path, use_entity, use_cache):
 
