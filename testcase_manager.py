@@ -43,7 +43,7 @@ def main(credential=None):
       print()
       print('Your input: %s' % (source))
       result = parser.parse(source, use_cache=False, use_entity=False)
-      print(colorize('Retrived chunks from current implementation:', 'blue'))
+      print(colorize('Retrieved chunks from current implementation:', 'blue'))
       print(colorize(
         DELIMITER.join([chunk['word'] for chunk in result['chunks']]), 'blue'))
       is_correct = ask_if_correct()
