@@ -104,19 +104,23 @@ class NLAPISegmenter(Segmenter):
       use_entity (:obj:`bool`, optional): Whether to use entity analysis
           results to wrap entity names in the output.
       use_cache (:obj:`bool`, optional): Whether to use a cache system.
+      cache_discovery (:obj:`bool`, optional): Whether to use the cache to
+          build the natural language API service [default: True]. When using
+          oauth2client >= 4.0.0 or google-auth, its value should be False.
   """
 
   supported_languages = {'ja', 'ko', 'zh', 'zh-TW', 'zh-CN', 'zh-HK', 'zh-Hant'}
 
-  def __init__(self, cache_filename, credentials_path, use_entity, use_cache):
+  def __init__(self, cache_filename, credentials_path, use_entity, use_cache,
+               cache_discovery=True):
 
     self.cache_filename = cache_filename
     self.credentials_path = credentials_path
     self.use_entity = use_entity
     self.use_cache = use_cache
-    self._authenticate()
+    self._authenticate(cache_discovery)
 
-  def _authenticate(self):
+  def _authenticate(self, cache_discovery):
 
     import google_auth_httplib2
     import googleapiclient.discovery
@@ -139,7 +143,8 @@ class NLAPISegmenter(Segmenter):
       scoped_credentials, _ = google.auth.default(scope)
     authed_http = google_auth_httplib2.AuthorizedHttp(scoped_credentials)
     service = googleapiclient.discovery.build(
-        'language', 'v1beta2', http=authed_http)
+        'language', 'v1beta2', http=authed_http,
+        cache_discovery=cache_discovery)
     self.service = service
 
   def segment(self, source, language=None):
