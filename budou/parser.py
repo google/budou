@@ -88,6 +88,13 @@ class NLAPIParser(Parser):
     cache_filename (:obj:`string`, optional): the path to the cache file.
     credentials_path (:obj:`string`, optional): the path to the service
         account's credentials file.
+    use_entity (:obj:`bool`, optional): Whether to use entity analysis
+      results to wrap entity names in the output.
+    use_cache (:obj:`bool`, optional): Whether to use a cache system.
+    service (:obj:`googleapiclient.discovery.Resource`, optional): A Resource
+      object for interacting with Cloud Natural Language API. If this is
+      given, the constructor skips the authentication process and use this
+      service instead.
 
   Attributes:
     segmenter(:obj:`budou.nlapisegmenter.NLAPISegmenter`): Segmenter module.
@@ -98,7 +105,9 @@ class NLAPIParser(Parser):
         cache_filename=options.get('cache_filename', None),
         credentials_path=options.get('credentials_path', None),
         use_entity=options.get('use_entity', False),
-        use_cache=options.get('use_cache', True))
+        use_cache=options.get('use_cache', True),
+        service=options.get('service', None),
+        )
 
 
 class MecabParser(Parser):
