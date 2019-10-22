@@ -107,18 +107,24 @@ class NLAPISegmenter(Segmenter):
       cache_discovery (:obj:`bool`, optional): Whether to use the cache to
           build the natural language API service [default: True]. When using
           oauth2client >= 4.0.0 or google-auth, its value should be False.
+      service (:obj:`googleapiclient.discovery.Resource`, optional): A Resource
+          object for interacting with Cloud Natural Language API. If this is
+          given, the constructor skips the authentication process and use this
+          service instead.
   """
 
   supported_languages = {'ja', 'ko', 'zh', 'zh-TW', 'zh-CN', 'zh-HK', 'zh-Hant'}
 
   def __init__(self, cache_filename, credentials_path, use_entity, use_cache,
-               cache_discovery=True):
+               cache_discovery=True, service=None):
 
     self.cache_filename = cache_filename
     self.credentials_path = credentials_path
     self.use_entity = use_entity
     self.use_cache = use_cache
-    self._authenticate(cache_discovery)
+    self.service = service
+    if self.service is None:
+      self.service = self._authenticate(cache_discovery)
 
   def _authenticate(self, cache_discovery):
 
@@ -145,7 +151,7 @@ class NLAPISegmenter(Segmenter):
     service = googleapiclient.discovery.build(
         'language', 'v1beta2', http=authed_http,
         cache_discovery=cache_discovery)
-    self.service = service
+    return service
 
   def segment(self, source, language=None):
     """Returns a chunk list from the given sentence.
