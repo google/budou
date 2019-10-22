@@ -248,7 +248,8 @@ force-refresh the cache, set :code:`use_cache` to :code:`False`.
 
 .. code-block:: python
 
-   parser = budou.parse('明日は晴れるかな', segmenter='nlapi', use_cache=False)
+   parser = budou.get_parser(segmenter='nlapi', use_cache=False)
+   result = parser.parse('明日は晴れるかな')
 
 In the `Google App Engine Python 2.7 Standard Environment <https://cloud.google.com/appengine/docs/standard/python/>`_,
 Budou tries to use the
