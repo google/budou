@@ -17,7 +17,7 @@
 """Budou: an automatic organizer tool for beautiful line breaking in CJK
 
 Usage:
-  budou <source> [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle]
+  budou [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle] <source>
   budou -h | --help
   budou -v | --version
 
