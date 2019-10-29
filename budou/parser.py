@@ -172,7 +172,7 @@ def parse_attributes(attributes=None, classname=None):
   attributes.setdefault('class', DEFAULT_CLASS_NAME)
   # If `classname` is specified, it overwrites `class` property in `attributes`.
   if classname:
-    attributes['class'] = classname
+    attributes['class'] = ' '.join(classname.split(','))
   return attributes
 
 def preprocess(source):

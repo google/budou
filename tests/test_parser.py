@@ -37,6 +37,9 @@ class TestParser(unittest.TestCase):
     self.assertEqual(results['class'], 'baz',
         '`classname` should precede to `class` property in `attributes`.')
 
+    results = budou.parser.parse_attributes(classname='foo,bar')
+    self.assertEqual(results['class'], 'foo bar',
+        'a comma-separated `classname` should be put as multiple class names')
   def test_preprocess(self):
     source = u' a\nb<br> c   d'
     expected = u'ab c d'
