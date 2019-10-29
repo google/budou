@@ -9,3 +9,4 @@ budou.egg-info/
 budou-cache.pickle
 .pytest_cache
 docs/_build
+/mecab
