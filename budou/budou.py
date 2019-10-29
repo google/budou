@@ -17,7 +17,7 @@
 """Budou: an automatic organizer tool for beautiful line breaking in CJK
 
 Usage:
-  budou <source> [--segmenter=<seg>] [--language=<lang>] [--classname=<class>]
+  budou <source> [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle]
   budou -h | --help
   budou -v | --version
 
@@ -33,6 +33,8 @@ Options:
   --classname=<classname>     Class name for output SPAN tags.
                               Use comma-separated value to specify multiple
                               classes.
+
+  --inlinestyle               Put `display:inline-block` as style attribute.
 """
 
 from __future__ import print_function
@@ -57,12 +59,14 @@ def main():
       args['<source>'],
       segmenter=args['--segmenter'],
       language=args['--language'],
-      classname=args['--classname'])
+      classname=args['--classname'],
+      inlinestyle=args['--inlinestyle'],
+      )
   print(result['html_code'])
   sys.exit()
 
 def parse(source, segmenter='nlapi', language=None, max_length=None,
-          classname=None, attributes=None, **kwargs):
+          classname=None, attributes=None, inlinestyle=False, **kwargs):
   """Parses input source.
 
   Args:
@@ -72,6 +76,7 @@ def parse(source, segmenter='nlapi', language=None, max_length=None,
     max_length (:obj:`int`, optional): Maximum length of a chunk.
     classname (:obj:`str`, optional): Class name of output SPAN tags.
     attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
+    inlinestyle (bool, optional): Put `display:inline-block` as style attribute.
 
   Returns:
     Results in a dict. :code:`chunks` holds a list of chunks
@@ -81,7 +86,7 @@ def parse(source, segmenter='nlapi', language=None, max_length=None,
   parser = get_parser(segmenter, **kwargs)
   return parser.parse(
       source, language=language, max_length=max_length, classname=classname,
-      attributes=attributes)
+      attributes=attributes, inlinestyle=inlinestyle)
 
 def authenticate(json_path=None):
   """Gets a Natural Language API parser by authenticating the API.

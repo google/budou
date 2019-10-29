@@ -40,6 +40,16 @@ class TestParser(unittest.TestCase):
     results = budou.parser.parse_attributes(classname='foo,bar')
     self.assertEqual(results['class'], 'foo bar',
         'a comma-separated `classname` should be put as multiple class names')
+
+    results = budou.parser.parse_attributes(inlinestyle=True)
+    self.assertEqual(results['style'], 'display:inline-block',
+        'style attribute should have `display:inline-block`.')
+
+    results = budou.parser.parse_attributes(
+            attributes={'style':'color:red'}, inlinestyle=True)
+    self.assertEqual(results['style'], 'color:red;display:inline-block',
+        '`display:inline-block` should be added to the style attribute.')
+
   def test_preprocess(self):
     source = u' a\nb<br> c   d'
     expected = u'ab c d'
