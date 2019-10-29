@@ -57,7 +57,7 @@ class Parser:
     self.segmenter = None
 
   def parse(self, source, language=None, classname=None, max_length=None,
-            attributes=None):
+            attributes=None, inlinestyle=False):
     """Parses the source sentence to output organized HTML code.
 
     Args:
@@ -65,12 +65,14 @@ class Parser:
       language (:obj:`str`, optional): Language code.
       max_length (:obj:`int`, optional): Maximum length of a chunk.
       attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
+      inlinestyle (bool, optional): Put `display:inline-block` as style
+                                    attribute.
 
     Returns:
       A dictionary containing :code:`chunks` (:obj:`budou.chunk.ChunkList`)
       and :code:`html_code` (:obj:`str`).
     """
-    attributes = parse_attributes(attributes, classname)
+    attributes = parse_attributes(attributes, classname, inlinestyle)
     source = preprocess(source)
     chunks = self.segmenter.segment(source, language)
     html_code = chunks.html_serialize(attributes, max_length=max_length)
@@ -157,12 +159,13 @@ def get_parser(segmenter, **options):
   else:
     raise ValueError('Segmenter {} is not supported.'.format(segmenter))
 
-def parse_attributes(attributes=None, classname=None):
+def parse_attributes(attributes=None, classname=None, inlinestyle=False):
   """Parses attributes,
 
   Args:
     attributes (dict): Input attributes.
     classname (:obj:`str`, optional): Class name of output SPAN tags.
+    inlinestyle (bool, optional): Put `display:inline-block` as style attribute.
 
   Returns:
     Parsed attributes. (dict)
@@ -172,7 +175,11 @@ def parse_attributes(attributes=None, classname=None):
   attributes.setdefault('class', DEFAULT_CLASS_NAME)
   # If `classname` is specified, it overwrites `class` property in `attributes`.
   if classname:
-    attributes['class'] = classname
+    attributes['class'] = ' '.join(classname.split(','))
+  if inlinestyle:
+    styles = attributes['style'].split(';') if 'style' in attributes else []
+    styles.append('display:inline-block')
+    attributes['style'] = ';'.join(styles)
   return attributes
 
 def preprocess(source):
