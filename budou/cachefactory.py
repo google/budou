@@ -20,15 +20,18 @@ import six
 
 
 def load_cache(filename=None):
-  """Loads cache system.
+  """Returns a cache service.
 
   If Google App Engine Standard Environment's memcache is available, this uses
   memcache as the backend. Otherwise, this uses :obj:`pickle` to cache
   the outputs in the local file system.
 
   Args:
-    filename (:obj:`str`, optional): The file path to the cache file. This is
+    filename (str, optional): The file path to the cache file. This is
         used only when :obj:`pickle` is used as the backend.
+
+  Returns:
+    A cache system (:obj:`budou.cachefactory.BudouCache`)
   """
   try:
     return AppEngineMemcache()
@@ -49,7 +52,7 @@ class BudouCache:
       key (str): Key to retrieve the value.
 
     Returns:
-      Retrieved value.
+      Retrieved value (str or None).
 
     Raises:
       NotImplementedError: If it's not implemented.
@@ -62,10 +65,7 @@ class BudouCache:
 
     Args:
       key (str): Key for the value.
-      val: Value to set.
-
-    Returns:
-      Retrieved value.
+      val (str): Value to set.
 
     Raises:
       NotImplementedError: If it's not implemented.
@@ -96,7 +96,7 @@ class PickleCache(BudouCache):
     Args:
       key (str): Key to retrieve the value.
 
-    Returns: Retrieved value.
+    Returns: Retrieved value (str or None).
     """
     self._create_file_if_none_exists()
     with open(self.filename, 'rb') as file_object:
@@ -109,10 +109,7 @@ class PickleCache(BudouCache):
 
     Args:
       key (str): Key for the value.
-      val: Value to set.
-
-    Returns:
-      Retrieved value.
+      val (str): Value to set.
     """
     self._create_file_if_none_exists()
     with open(self.filename, 'r+b') as file_object:
@@ -146,7 +143,7 @@ class AppEngineMemcache(BudouCache):
       key (str): Key to retrieve the value.
 
     Returns:
-      Retrieved value.
+      Retrieved value (str or None).
     """
     return self.memcache.get(key, None)
 
@@ -155,9 +152,6 @@ class AppEngineMemcache(BudouCache):
 
     Args:
       key (str): Key for the value.
-      val: Value to set.
-
-    Returns:
-      Retrieved value.
+      val (str): Value to set.
     """
     self.memcache.set(key, val)

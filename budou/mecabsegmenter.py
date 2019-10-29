@@ -61,14 +61,14 @@ class MecabSegmenter(Segmenter):
 
     Args:
       source (str): Source string to segment.
-      language (:obj:`str`, optional): A language code.
+      language (str, optional): A language code.
 
     Returns:
       A chunk list. (:obj:`budou.chunk.ChunkList`)
 
     Raises:
-      ValueError: If :obj:`language` is given and it is not included in
-                  :obj:`supported_languages`.
+      ValueError: If :code:`language` is given and it is not included in
+                  :code:`supported_languages`.
     """
     if language and not language in self.supported_languages:
       raise ValueError(
