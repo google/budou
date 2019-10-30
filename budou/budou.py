@@ -18,9 +18,7 @@
 
 Usage:
   budou [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle] <source>
-
   budou -h | --help
-
   budou -v | --version
 
 
