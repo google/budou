@@ -27,18 +27,18 @@ class Chunk:
 
   Attributes:
     word (str): Surface word of the chunk.
-    pos (:obj:`str`, optional): Part of speech.
-    label (:obj:`str`, optional): Label information.
-    dependency (:obj:`bool`, optional): Dependency to neighbor words.
+    pos (str, optional): Part of speech.
+    label (str, optional): Label information.
+    dependency (bool, optional): Dependency to neighbor words.
         :code:`None` for no dependency, :code:`True` for dependency to the
         following word, and :code:`False` for the dependency to the previous
         word.
 
   Args:
     word (str): Surface word of the chunk.
-    pos (:obj:`str`, optional): Part of speech.
-    label (:obj:`str`, optional): Label information.
-    dependency (:obj:`bool`, optional): Dependency to neighbor words.
+    pos (str, optional): Part of speech.
+    label (str, optional): Label information.
+    dependency (bool, optional): Dependency to neighbor words.
         :code:`None` for no dependency, :code:`True` for dependency to the
         following word, and :code:`False` for the dependency to the previous
         word.
@@ -277,7 +277,7 @@ class ChunkList(collections.MutableSequence):
     Args:
       attributes (dict): A map of name-value pairs for attributes of output
           SPAN tags.
-      max_length (:obj:`int`, optional): Maximum length of span enclosed chunk.
+      max_length (int, optional): Maximum length of span enclosed chunk.
 
     Returns:
       The organized HTML code. (str)

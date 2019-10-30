@@ -93,18 +93,18 @@ class NLAPISegmenter(Segmenter):
     supported_languages (list of str): List of supported languages' codes.
 
   Args:
-      cache_filename (:obj:`str`, optional): File path to the pickle file for
+      cache_filename (str, optional): File path to the pickle file for
           caching. The file is created automatically if not exist. If the
           environment is Google App Engine Standard Environment and memcache
           service is available, it is used for caching and the pickle file
           won't be generated.
-      credentials_path (:obj:`str`, optional): File path to the service
+      credentials_path (str, optional): File path to the service
           account's credentials file. If no file path is specified, it tries
           to authenticate with default credentials.
-      use_entity (:obj:`bool`, optional): Whether to use entity analysis
+      use_entity (bool, optional): Whether to use entity analysis
           results to wrap entity names in the output.
-      use_cache (:obj:`bool`, optional): Whether to use a cache system.
-      cache_discovery (:obj:`bool`, optional): Whether to use the cache to
+      use_cache (bool, optional): Whether to use a cache system.
+      cache_discovery (bool, optional): Whether to use the cache to
           build the natural language API service [default: True]. When using
           oauth2client >= 4.0.0 or google-auth, its value should be False.
       service (:obj:`googleapiclient.discovery.Resource`, optional): A Resource
@@ -158,14 +158,14 @@ class NLAPISegmenter(Segmenter):
 
     Args:
       source (str): Source string to segment.
-      language (:obj:`str`, optional): A language code.
+      language (str, optional): A language code.
 
     Returns:
       A chunk list. (:obj:`budou.chunk.ChunkList`)
 
     Raises:
-      ValueError: If :obj:`language` is given and it is not included in
-                  :obj:`supported_languages`.
+      ValueError: If :code:`language` is given and it is not included in
+                  :code:`supported_languages`.
     """
     if language and not language in self.supported_languages:
       raise ValueError(
@@ -183,7 +183,7 @@ class NLAPISegmenter(Segmenter):
 
     Args:
       input_text (str): Text to annotate.
-      language (:obj:`str`, optional): Language of the text.
+      language (str, optional): Language of the text.
 
     Returns:
       A chunk list. (:obj:`budou.chunk.ChunkList`)
@@ -237,7 +237,7 @@ class NLAPISegmenter(Segmenter):
 
     Args:
       text (str): Input text.
-      language (:obj:`str`, optional): Language code.
+      language (str, optional): Language code.
 
     Returns:
       Results in a dictionary. :code:`tokens` contains the list of annotations
@@ -269,7 +269,7 @@ class NLAPISegmenter(Segmenter):
 
     Args:
       text (str): Input text.
-      language (:obj:`str`, optional): Language code.
+      language (str, optional): Language code.
 
     Returns:
       List of entities.

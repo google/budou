@@ -30,7 +30,7 @@ class Segmenter:
 
     Args:
       source (str): Source string to segment.
-      language (:obj:`str`, optional): A language code.
+      language (str, optional): A language code.
 
     Returns:
       A chunk list. (:obj:`budou.chunk.ChunkList`)

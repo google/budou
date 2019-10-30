@@ -18,8 +18,11 @@
 
 Usage:
   budou [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle] <source>
+
   budou -h | --help
+
   budou -v | --version
+
 
 Options:
   -h --help                   Show this screen.
@@ -30,11 +33,11 @@ Options:
 
   --language=<language>       Language the source in.
 
-  --classname=<classname>     Class name for output SPAN tags.
-                              Use comma-separated value to specify multiple
-                              classes.
+  --classname=<classname>     Class name for output SPAN tags. Use
+                              comma-separated value to specify multiple classes.
 
-  --inlinestyle               Put `display:inline-block` as style attribute.
+  --inlinestyle               Add :code:`display:inline-block` as inline style
+                              attribute.
 """
 
 from __future__ import print_function
@@ -71,12 +74,13 @@ def parse(source, segmenter='nlapi', language=None, max_length=None,
 
   Args:
     source (str): Input source to process.
-    segmenter (:obj:`str`, optional): Segmenter to use [default: nlapi].
-    language (:obj:`str`, optional): Language code.
-    max_length (:obj:`int`, optional): Maximum length of a chunk.
-    classname (:obj:`str`, optional): Class name of output SPAN tags.
-    attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
-    inlinestyle (bool, optional): Put `display:inline-block` as style attribute.
+    segmenter (str, optional): Segmenter to use [default: nlapi].
+    language (str, optional): Language code.
+    max_length (int, optional): Maximum length of a chunk.
+    classname (str, optional): Class name of output SPAN tags.
+    attributes (dict, optional): Attributes for output SPAN tags.
+    inlinestyle (bool, optional): Add :code:`display:inline-block` as inline
+                                  style attribute.
 
   Returns:
     Results in a dict. :code:`chunks` holds a list of chunks
@@ -91,11 +95,11 @@ def parse(source, segmenter='nlapi', language=None, max_length=None,
 def authenticate(json_path=None):
   """Gets a Natural Language API parser by authenticating the API.
 
-  **This method is deprecated.** Please use :obj:`budou.get_parser` to obtain a
-  parser instead.
+  **This method is deprecated.** Please use :obj:`budou.parser.get_parser` to
+  obtain a parser instead.
 
   Args:
-    json_path (:obj:`str`, optional): The file path to the service account's
+    json_path (str, optional): The file path to the service account's
         credentials.
 
   Returns:
@@ -103,7 +107,7 @@ def authenticate(json_path=None):
 
   """
   msg = ('budou.authentication() is deprecated. '
-         'Please use budou.get_parser() to obtain a parser instead.')
+         'Please use budou.parser.get_parser() to obtain a parser instead.')
   warnings.warn(msg, DeprecationWarning)
   parser = get_parser('nlapi', credentials_path=json_path)
   return parser

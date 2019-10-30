@@ -15,8 +15,8 @@
 # limitations under the License.
 """Parser modules.
 
-Parser modules are equipped with :code:`parse` method and it processes the
-input text into a list of chunks and an organized HTML snippet.
+Parser modules have :code:`parse` method which processes the input text into a
+list of chunks and a HTML snippet.
 
 Examples:
 
@@ -62,15 +62,15 @@ class Parser:
 
     Args:
       source (str): Source sentence to process.
-      language (:obj:`str`, optional): Language code.
-      max_length (:obj:`int`, optional): Maximum length of a chunk.
-      attributes (:obj:`dict`, optional): Attributes for output SPAN tags.
-      inlinestyle (bool, optional): Put `display:inline-block` as style
-                                    attribute.
+      language (str, optional): Language code.
+      max_length (int, optional): Maximum length of a chunk.
+      attributes (dict, optional): Attributes for output SPAN tags.
+      inlinestyle (bool, optional): Add :code:`display:inline-block` as inline
+                                    style attribute.
 
     Returns:
       A dictionary containing :code:`chunks` (:obj:`budou.chunk.ChunkList`)
-      and :code:`html_code` (:obj:`str`).
+      and :code:`html_code` (str).
     """
     attributes = parse_attributes(attributes, classname, inlinestyle)
     source = preprocess(source)
@@ -87,12 +87,12 @@ class NLAPIParser(Parser):
   (:obj:`budou.nlapisegmenter.NLAPISegmenter`).
 
   Args:
-    cache_filename (:obj:`string`, optional): the path to the cache file.
-    credentials_path (:obj:`string`, optional): the path to the service
+    cache_filename (string, optional): the path to the cache file.
+    credentials_path (string, optional): the path to the service
         account's credentials file.
-    use_entity (:obj:`bool`, optional): Whether to use entity analysis
+    use_entity (bool, optional): Whether to use entity analysis
       results to wrap entity names in the output.
-    use_cache (:obj:`bool`, optional): Whether to use a cache system.
+    use_cache (bool, optional): Whether to use a cache system.
     service (:obj:`googleapiclient.discovery.Resource`, optional): A Resource
       object for interacting with Cloud Natural Language API. If this is
       given, the constructor skips the authentication process and use this
@@ -142,7 +142,7 @@ def get_parser(segmenter, **options):
 
   Args:
     segmenter (str): Segmenter to use.
-    options (:obj:`dict`, optional): Optional settings.
+    options (dict, optional): Optional settings.
 
   Returns:
     Parser (:obj:`budou.parser.Parser`)
@@ -164,8 +164,9 @@ def parse_attributes(attributes=None, classname=None, inlinestyle=False):
 
   Args:
     attributes (dict): Input attributes.
-    classname (:obj:`str`, optional): Class name of output SPAN tags.
-    inlinestyle (bool, optional): Put `display:inline-block` as style attribute.
+    classname (str, optional): Class name of output SPAN tags.
+    inlinestyle (bool, optional): Add :code:`display:inline-block` as inline
+                                  style attribute.
 
   Returns:
     Parsed attributes. (dict)
