@@ -163,5 +163,15 @@ class TestChunkList(unittest.TestCase):
   # TODO (tushuhei) Check if TypeError is raised when any instance but Chunk
   # is given to the list.
 
+  def test_wbr_serialize(self):
+    chunks = ChunkList(Chunk(u'今日は'), Chunk(u'ご飯を'), Chunk(u'食べます。'))
+    result = chunks.html_serialize({}, use_wbr=True)
+    expected = (
+        '<span style="word-break: keep-all;">'
+        u'今日は<wbr></wbr>ご飯を<wbr></wbr>食べます。'
+        '</span>')
+    self.assertEqual(
+        result, expected, 'Chunks should be separated by WBR tags.')
+
 if __name__ == '__main__':
   unittest.main()

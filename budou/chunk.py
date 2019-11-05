@@ -21,6 +21,10 @@ import collections
 from xml.etree import ElementTree as ET
 import unicodedata
 import html5lib
+from html5lib import getTreeWalker
+from html5lib.filters import sanitizer
+from html5lib.constants import namespaces
+
 
 class Chunk:
   """A unit for word segmentation.
@@ -271,7 +275,23 @@ class ChunkList(collections.MutableSequence):
         target_chunks.append(chunk)
     self.list = target_chunks
 
-  def html_serialize(self, attributes, max_length=None):
+  def html_serialize(self, attributes, max_length=None, use_wbr=False):
+    """Returns concatenated HTML code with SPAN tag.
+
+    Args:
+      attributes (dict): A map of name-value pairs for attributes of output
+          SPAN tags.
+      max_length (int, optional): Maximum length of span enclosed chunk.
+
+    Returns:
+      The organized HTML code. (str)
+    """
+    if use_wbr:
+      return self.wbr_serialize(attributes, max_length)
+    else:
+      return self.span_serialize(attributes, max_length)
+
+  def span_serialize(self, attributes, max_length=None):
     """Returns concatenated HTML code with SPAN tag.
 
     Args:
@@ -309,3 +329,42 @@ class ChunkList(collections.MutableSequence):
         html5lib.parseFragment(result), sanitize=True,
         quote_attr_values='always')
     return result
+
+  def wbr_serialize(self, attributes, max_length=None):
+    doc = ET.Element('span')
+    doc.attrib['style'] = 'word-break: keep-all'
+    for chunk in self:
+      if (chunk.has_cjk() and doc.text and
+          not (max_length and len(chunk.word) > max_length)):
+        ele = ET.Element('wbr')
+        doc.append(ele)
+        doc.getchildren()[-1].tail = chunk.word
+      else:
+        # add word without span tag for non-CJK text (e.g. English)
+        # by appending it after the last element
+        if doc.getchildren():
+          if doc.getchildren()[-1].tail is None:
+            doc.getchildren()[-1].tail = chunk.word
+          else:
+            doc.getchildren()[-1].tail += chunk.word
+        else:
+          if doc.text is None:
+            doc.text = chunk.word
+          else:
+            doc.text += chunk.word
+    content = ET.tostring(doc, encoding='utf-8').decode('utf-8')
+    dom = html5lib.parseFragment(content)
+    treewalker = getTreeWalker('etree')
+    stream = treewalker(dom)
+    serializer = html5lib.serializer.HTMLSerializer(
+            quote_attr_values='always')
+    allowed_elements = set(sanitizer.allowed_elements)
+    allowed_elements.add((namespaces['html'], 'wbr'))
+    allowed_css_properties = set(sanitizer.allowed_css_properties)
+    allowed_css_properties.add('word-break')
+    result = serializer.render(sanitizer.Filter(
+        stream, allowed_elements=allowed_elements,
+        allowed_css_properties=allowed_css_properties,
+        ))
+    return result
+
