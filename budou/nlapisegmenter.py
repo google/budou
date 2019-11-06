@@ -171,7 +171,7 @@ class NLAPISegmenter(Segmenter):
       ValueError: If :code:`language` is given and it is not included in
                   :code:`supported_languages`.
     """
-    if language and not language in self.supported_languages:
+    if language and language not in self.supported_languages:
       raise ValueError(
           'Language {} is not supported by NLAPI segmenter'.format(language))
 

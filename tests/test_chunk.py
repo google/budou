@@ -114,7 +114,7 @@ class TestChunkList(unittest.TestCase):
         [u'これが', '\n', 'Android'], [chunk.word for chunk in chunks],
         'Trailing spaces in CJK chunk should be converted to breaklines.')
 
-  def test_html_serialize(self):
+  def test_span_serialize(self):
     chunks = ChunkList(Chunk('Hello'), Chunk.space(), Chunk(u'今天'),
         Chunk(u'天气'), Chunk(u'很好'))
     attributes = {
@@ -127,7 +127,7 @@ class TestChunkList(unittest.TestCase):
         u'<span class="foo">天气</span>'
         u'<span class="foo">很好</span>'
         '</span>')
-    result = chunks.html_serialize(attributes, None)
+    result = chunks.span_serialize(attributes, None)
     self.assertEqual(
         result, expected,
         'The chunks should be compiled to a HTML code.')
@@ -140,7 +140,7 @@ class TestChunkList(unittest.TestCase):
     expected = ('<span>'
         'Hey&lt;&lt;script&gt;alert(1)&lt;/script&gt;&gt;guys'
         '</span>')
-    result = chunks.html_serialize(attributes, None)
+    result = chunks.span_serialize(attributes, None)
     self.assertEqual(
         result, expected, 'HTML tags included in a chunk should be encoded.')
 
@@ -155,13 +155,23 @@ class TestChunkList(unittest.TestCase):
         u'インフルエンザに'
         u'<span class="foo">かかった。</span>'
         '</span>')
-    result = chunks.html_serialize(attributes, 6)
+    result = chunks.span_serialize(attributes, 6)
     self.assertEqual(
         result, expected,
         'Chunks that exceed the max length should not be enclosed by a span.')
 
   # TODO (tushuhei) Check if TypeError is raised when any instance but Chunk
   # is given to the list.
+
+  def test_wbr_serialize(self):
+    chunks = ChunkList(Chunk(u'今日は'), Chunk(u'ご飯を'), Chunk(u'食べます。'))
+    result = chunks.wbr_serialize()
+    expected = (
+        '<span style="word-break: keep-all;">'
+        u'今日は<wbr></wbr>ご飯を<wbr></wbr>食べます。'
+        '</span>')
+    self.assertEqual(
+        result, expected, 'Chunks should be separated by WBR tags.')
 
 if __name__ == '__main__':
   unittest.main()
