@@ -282,12 +282,13 @@ class ChunkList(collections.MutableSequence):
       attributes (dict): A map of name-value pairs for attributes of output
           SPAN tags.
       max_length (int, optional): Maximum length of span enclosed chunk.
+      use_wbr (bool, optional): Use WBR tag to serialize the output.
 
     Returns:
       The organized HTML code. (str)
     """
     if use_wbr:
-      return self.wbr_serialize(attributes, max_length)
+      return self.wbr_serialize(max_length)
     else:
       return self.span_serialize(attributes, max_length)
 
@@ -330,12 +331,16 @@ class ChunkList(collections.MutableSequence):
         quote_attr_values='always')
     return result
 
-  def wbr_serialize(self, attributes, max_length=None):
+  def wbr_serialize(self):
+    """Returns concatenated HTML code with WBR tag. This is still experimental.
+
+    Returns:
+      The organized HTML code. (str)
+    """
     doc = ET.Element('span')
     doc.attrib['style'] = 'word-break: keep-all'
     for chunk in self:
-      if (chunk.has_cjk() and doc.text and
-          not (max_length and len(chunk.word) > max_length)):
+      if (chunk.has_cjk() and doc.text):
         ele = ET.Element('wbr')
         doc.append(ele)
         doc.getchildren()[-1].tail = chunk.word
