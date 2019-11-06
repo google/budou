@@ -47,6 +47,7 @@ system is chosen to be used based on the environment.
 from __future__ import unicode_literals
 import logging
 import hashlib
+from builtins import str
 from .segmenter import Segmenter
 from .cachefactory import load_cache
 from .chunk import Chunk, ChunkList
@@ -57,6 +58,13 @@ _DEPENDENT_LABEL = (
 """ list of str: Labels dependent to other parts.
 """
 
+def generate_hash(classname, funcname, *args, **kwargs):
+  key = ':'.join([
+      classname, funcname,
+      '_'.join([str(a) for a in args]),
+      '_'.join([str(w) for w in kwargs.values()])])
+  key = hashlib.md5(key.encode('utf-8')).hexdigest()
+  return key
 
 def _memorize(func):
   """Decorator to cache the given function's output.
@@ -67,11 +75,8 @@ def _memorize(func):
     """
     if self.use_cache:
       cache = load_cache(self.cache_filename)
-      original_key = ':'.join([
-          self.__class__.__name__,
-          func.__name__,
-          '_'.join([str(a) for a in args]),
-          '_'.join([str(w) for w in kwargs.values()])])
+      original_key = generate_hash(
+              self.__class__.__name__, func.__name__, args, kwargs)
       cache_key = hashlib.md5(original_key.encode('utf-8')).hexdigest()
       cached_val = cache.get(cache_key)
       if cached_val:

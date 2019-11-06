@@ -63,6 +63,13 @@ class TestNLAPISegmenter(unittest.TestCase):
           u'Chunks do not match in a test case (entity on): {source}'.format(
             source=case['sentence']))
 
+  def test_generate_hash(self):
+    result1 = budou.nlapisegmenter.generate_hash(
+            'a', 'b', u'あ', [u'い'], foo=u'う', bar={'alice': u'え'})
+    result2 = budou.nlapisegmenter.generate_hash(
+            'a', 'b', u'あ', [u'い'], foo=u'う', bar={'bob': u'え'})
+    self.assertNotEqual(result1, result2,
+            u'Generated hash should not be identical if parameters are unique.')
 
 if __name__ == '__main__':
   unittest.main()
