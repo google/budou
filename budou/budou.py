@@ -67,7 +67,7 @@ def main():
       inlinestyle=args['--inlinestyle'],
       wbr=args['--wbr'],
       )
-  print(result['html_code'])
+  print(result['html_code'].encode('utf-8'))
   sys.exit()
 
 def parse(source, segmenter='nlapi', language=None, max_length=None,
