@@ -67,7 +67,10 @@ def main():
       inlinestyle=args['--inlinestyle'],
       wbr=args['--wbr'],
       )
-  print(result['html_code'].encode('utf-8'))
+  html_code = result['html_code']
+  if not isinstance(html_code, str):
+    html_code = html_code.encode('utf-8')
+  print(html_code)
   sys.exit()
 
 def parse(source, segmenter='nlapi', language=None, max_length=None,
