@@ -373,3 +373,9 @@ class ChunkList(collections.MutableSequence):
         ))
     return result
 
+  def seperator_serialize(self, seperator):
+    result =[]
+    for chunk in self:
+      result.append(chunk.word)
+    return seperator.join(result)
+
