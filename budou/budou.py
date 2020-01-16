@@ -62,7 +62,7 @@ def main():
   if args['<source>']:
     source = args['<source>']
   elif not sys.stdin.isatty():
-   source = sys.stdin.read()
+    source = sys.stdin.read()
   else:
     print(__doc__.split("\n\n")[1])
     sys.exit()
