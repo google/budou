@@ -64,6 +64,7 @@ def main():
   elif not sys.stdin.isatty():
    source = sys.stdin.read()
   else:
+    print(__doc__.split("\n\n")[1])
     sys.exit()
 
   result = parse(
