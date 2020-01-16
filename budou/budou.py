@@ -49,7 +49,6 @@ from docopt import docopt
 from .parser import get_parser
 from .__version__ import __version__
 
-AVAILABLE_SEGMENTERS = {'nlapi', 'mecab'}
 
 def main():
   """Budou main method for the command line tool.
@@ -58,7 +57,7 @@ def main():
   if args['--version']:
     print(__version__)
     sys.exit()
-    
+
   if args['<source>']:
     source = args['<source>']
   elif not sys.stdin.isatty():
