@@ -17,7 +17,7 @@
 """Budou: an automatic organizer tool for beautiful line breaking in CJK
 
 Usage:
-  budou [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle] [--wbr] <source>
+  budou [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle] [--wbr] [<source>]
   budou -h | --help
   budou -v | --version
 
@@ -58,9 +58,17 @@ def main():
   if args['--version']:
     print(__version__)
     sys.exit()
+    
+  if args['<source>']:
+    source = args['<source>']
+  elif not sys.stdin.isatty():
+    source = sys.stdin.read()
+  else:
+    print(__doc__.split("\n\n")[1])
+    sys.exit()
 
   result = parse(
-      args['<source>'],
+      source,
       segmenter=args['--segmenter'],
       language=args['--language'],
       classname=args['--classname'],
