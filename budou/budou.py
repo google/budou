@@ -78,11 +78,15 @@ def main():
       inlinestyle=args['--inlinestyle'],
       wbr=args['--wbr'],
       )
-
+  
   if args['--seperator']:
-    print(result['chunks'].seperator_serialize(args['--seperator']).encode('utf-8'))
+    output = result['chunks'].seperator_serialize(args['--seperator'])
   else:
-    print(result['html_code'].encode('utf-8'))
+    output = result['html_code']
+    
+  if not isinstance(output, str):
+    output = output.encode('utf-8')
+  print(output)
 
   sys.exit()
 
