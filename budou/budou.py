@@ -17,7 +17,7 @@
 """Budou: an automatic organizer tool for beautiful line breaking in CJK
 
 Usage:
-  budou [--segmenter=<seg>] [--language=<lang>] [--seperator=<seperator>] [--classname=<class>] [--inlinestyle] [--wbr] [<source>]
+  budou [--segmenter=<seg>] [--language=<lang>] [--separator=<separator>] [--classname=<class>] [--inlinestyle] [--wbr] [<source>]
   budou -h | --help
   budou -v | --version
 
@@ -31,7 +31,7 @@ Options:
 
   --language=<language>       Language the source in.
 
-  --seperator=<seperator>     Custom seperator instead of SPAN tags, when used
+  --separator=<separator>     Custom separator instead of SPAN tags, when used
                               classname and inlinestyle are ignored
 
   --classname=<classname>     Class name for output SPAN tags. Use
@@ -79,14 +79,18 @@ def main():
       wbr=args['--wbr'],
       )
 
-  if args['--seperator']:
-    print(result['chunks'].seperator_serialize(args['--seperator']).encode('utf-8'))
+  if args['--separator']:
+    output = result['chunks'].separator_serialize(args['--separator'])
   else:
-    print(result['html_code'].encode('utf-8'))
+    output = result['html_code']
+    
+  if not isinstance(output, str):
+    output = output.encode('utf-8')
+  print(output)
 
   sys.exit()
 
-def parse(source, segmenter='nlapi', language=None, max_length=None, seperator=None,
+def parse(source, segmenter='nlapi', language=None, max_length=None, separator=None,
           classname=None, attributes=None, inlinestyle=False, wbr=False,
           **kwargs):
   """Parses input source.
