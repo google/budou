@@ -90,7 +90,7 @@ def main():
 
   sys.exit()
 
-def parse(source, segmenter='nlapi', language=None, max_length=None, separator=None,
+def parse(source, segmenter='nlapi', language=None, max_length=None,
           classname=None, attributes=None, inlinestyle=False, wbr=False,
           **kwargs):
   """Parses input source.
