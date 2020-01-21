@@ -17,7 +17,7 @@
 """Budou: an automatic organizer tool for beautiful line breaking in CJK
 
 Usage:
-  budou [--segmenter=<seg>] [--language=<lang>] [--classname=<class>] [--inlinestyle] [--wbr] [<source>]
+  budou [--segmenter=<seg>] [--language=<lang>] [--separator=<separator>] [--classname=<class>] [--inlinestyle] [--wbr] [<source>]
   budou -h | --help
   budou -v | --version
 
@@ -30,6 +30,9 @@ Options:
   --segmenter=<segmenter>     Segmenter to use [default: nlapi].
 
   --language=<language>       Language the source in.
+
+  --separator=<separator>     Custom separator instead of SPAN tags, when used
+                              classname and inlinestyle are ignored
 
   --classname=<classname>     Class name for output SPAN tags. Use
                               comma-separated value to specify multiple classes.
@@ -74,10 +77,16 @@ def main():
       inlinestyle=args['--inlinestyle'],
       wbr=args['--wbr'],
       )
-  html_code = result['html_code']
-  if not isinstance(html_code, str):
-    html_code = html_code.encode('utf-8')
-  print(html_code)
+
+  if args['--separator']:
+    output = result['chunks'].separator_serialize(args['--separator'])
+  else:
+    output = result['html_code']
+    
+  if not isinstance(output, str):
+    output = output.encode('utf-8')
+  print(output)
+
   sys.exit()
 
 def parse(source, segmenter='nlapi', language=None, max_length=None,

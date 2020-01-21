@@ -373,3 +373,14 @@ class ChunkList(collections.MutableSequence):
         ))
     return result
 
+  def separator_serialize(self, separator):
+    """Returns concatenated chunks with a custom separator in between.
+
+    Returns:
+      The organized string with custom separator (str)
+    """
+    result = []
+    for chunk in self:
+      result.append(chunk.word)
+    return separator.join(result)
+
