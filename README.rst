@@ -4,9 +4,6 @@ Budou 🍇
 .. image:: https://badge.fury.io/py/budou.svg
    :target: https://badge.fury.io/py/budou
 
-.. image:: https://travis-ci.org/google/budou.svg?branch=master
-   :target: https://travis-ci.org/google/budou
-
 English text has many clues, like spacing and hyphenation, that enable beautiful
 and legible line breaks. Some CJK languages lack these clues, and so are
 notoriously more difficult to process. Without a more careful approach,
