@@ -1,6 +1,8 @@
 Budou 🍇
 ===========
 
+**Budou is in maintenance mode. The development team is focusing on developing its successor,** `BudouX <https://github.com/google/budoux>`_
+
 .. image:: https://badge.fury.io/py/budou.svg
    :target: https://badge.fury.io/py/budou
 
